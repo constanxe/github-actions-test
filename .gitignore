@@ -1,5 +1,1 @@
-
-server/ascenda/loyalty/Dockerfile
-server/ascenda/loyalty/loyalty.py
-server/ascenda/loyalty/requirements.txt
 client/*
