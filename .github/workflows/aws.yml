@@ -73,7 +73,7 @@ jobs:
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: ./server/ascenda/loyalty/task-def.json
+        task-definition: task-def.json
         container-name: ascenda
         image: ${{ steps.build-image.outputs.image }}
 
