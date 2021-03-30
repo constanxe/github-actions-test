@@ -1,14 +1,14 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:us-east-1:717942231127:task-definition/loyalty:1",
+    "taskDefinitionArn": "arn:aws:ecs:us-east-1:717942231127:task-definition/exchange_rate:1",
     "containerDefinitions": [
         {
-            "name": "loyalty-container",
-            "image": "717942231127.dkr.ecr.us-east-1.amazonaws.com/ascenda:loyalty",
+            "name": "exchange_rate_container",
+            "image": "717942231127.dkr.ecr.us-east-1.amazonaws.com/ascenda:exchange_rate",
             "cpu": 0,
             "portMappings": [
                 {
-                    "containerPort": 5006,
-                    "hostPort": 5006,
+                    "containerPort": 5003,
+                    "hostPort": 5003,
                     "protocol": "tcp"
                 }
             ],
@@ -19,14 +19,14 @@
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
-                    "awslogs-group": "/ecs/loyalty",
+                    "awslogs-group": "/ecs/exchange_rate",
                     "awslogs-region": "us-east-1",
                     "awslogs-stream-prefix": "ecs"
                 }
             }
         }
     ],
-    "family": "loyalty",
+    "family": "exchange_rate",
     "taskRoleArn": "arn:aws:iam::717942231127:role/ecsTaskExecutionRole",
     "executionRoleArn": "arn:aws:iam::717942231127:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
@@ -69,6 +69,6 @@
     ],
     "cpu": "256",
     "memory": "512",
-    "registeredAt": "2021-03-29T00:47:16.006000+08:00",
+    "registeredAt": "2021-03-29T00:48:15.417000+08:00",
     "registeredBy": "arn:aws:iam::717942231127:user/team1"
 }

@@ -1,0 +1,74 @@
+{
+    "taskDefinitionArn": "arn:aws:ecs:us-east-1:717942231127:task-definition/transaction:1",
+    "containerDefinitions": [
+        {
+            "name": "transaction-container",
+            "image": "717942231127.dkr.ecr.us-east-1.amazonaws.com/ascenda:transaction",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "containerPort": 5004,
+                    "hostPort": 5004,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/transaction",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            }
+        }
+    ],
+    "family": "transaction",
+    "taskRoleArn": "arn:aws:iam::717942231127:role/ecsTaskExecutionRole",
+    "executionRoleArn": "arn:aws:iam::717942231127:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "revision": 1,
+    "volumes": [],
+    "status": "ACTIVE",
+    "requiresAttributes": [
+        {
+            "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+        },
+        {
+            "name": "ecs.capability.execution-role-awslogs"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.ecr-auth"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.task-iam-role"
+        },
+        {
+            "name": "ecs.capability.execution-role-ecr-pull"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+        },
+        {
+            "name": "ecs.capability.task-eni"
+        }
+    ],
+    "placementConstraints": [],
+    "compatibilities": [
+        "EC2",
+        "FARGATE"
+    ],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "256",
+    "memory": "512",
+    "registeredAt": "2021-03-29T00:46:20.956000+08:00",
+    "registeredBy": "arn:aws:iam::717942231127:user/team1"
+}
