@@ -1,4 +1,6 @@
 
+aws ecr create-repository --repository-name ascenda-test --image-scanning-configuration scanOnPush=true --region us-east-1
+
 aws ecs register-task-definition --region us-east-1 --cli-input-json file://$HOME/Desktop/ascenda-test/ascenda-test/task-def.json
 
 aws ecs create-cluster --region us-east-1 --cluster-name default
