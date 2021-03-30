@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loyalty Programmes</title>
+
+    {% include './global/stylesheets.html' %}
+</head>
+
+<body class="bg-light">
+
+    {% include './global/header.html' %}
+
+    <div class="container-fluid">
+        <div class="w-75 m-auto pt-3">
+            <h4> {{data['featured_programs']|length}} Featured Loyalty Programs </h4>
+            <ul class="list-group list-group-flush">
+                {% for item in data['featured_programs'] %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div class="text-bold">
+                        {{item["loyalty_name"]}}
+                    </div>
+                    <button class="btn btn-link transferMilesBtn" data-item='{{item|tojson|safe}}'>Transfer Miles</button>
+                </li>
+                {%endfor%}
+            </ul>
+        </div>
+        <div class="w-75 m-auto pt-3">
+            <h4> {{data['programs']|length}} Available Loyalty Programs </h4>
+            <ul class="list-group list-group-flush">
+                {% for item in data['programs'] %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div class="text-bold">
+                        {{item["loyalty_name"]}}
+                    </div>
+                    <button class="btn btn-link transferMilesBtn" data-item='{{item|tojson|safe}}'>Transfer Miles</button>
+                </li>
+                {%endfor%}
+            </ul>
+        </div>
+
+    </div>
+    <form id="transferForm">
+        <div class="modal fade" id="transferMilesModal" tabindex="-1" aria-labelledby="transferMilesModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="transferMilesModalLabel">Transfer Your Miles</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                    </div>
+                    <div id="body-content" class="modal-body text-center">
+                        <p class="lead">Transfer your miles to your <b class="programName"></b> account:</p>
+                        <b id="selected_member"></b>
+                        <div class="d-flex align-items-baseline justify-content-between grey-box mt-2">
+                            <p class="lead m-auto">
+                                <span class="font-weight-bold" id="amountAvailable">{{data["user"]["credits"]}}</span><br> AVAILABLE
+                            </p>
+                            <div>
+                                -
+                            </div>
+                            <p class="lead m-auto">
+                                <span class="font-weight-bold" id="amountUsing">-</span><br> USING
+                            </p>
+
+                            <div>
+                                =
+                            </div>
+
+                            <p class="lead m-auto">
+                                <span class="font-weight-bold" id="amountRemaining">{{data["user"]["credits"]}}</span><br> REMAINING
+                            </p>
+                        </div>
+                        <input type="hidden" name="inputProgramID" id="inputProgramID">
+                        <input type="hidden" name="inputMemberID" id="inputMemberID">
+
+                        <div class="form-group mt-3">
+                            <label for="message-text" class="col-form-label">Total Rewards to Transfer</label>
+                            <input type="number" class="form-control" id="inputTransferAmount" name="inputTransferAmount" max="{{data['user']['credits']}}" required>
+                            <small id="transferRates" class="form-text text-muted">Equates to <span class="rates">-</span> <span class="currency"></span> </small>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button name="transfer" type="submit" class="btn btn-success btn-block">Complete Transfer</button>
+                        <b class="text-center py-3">
+                        All transfer are final.
+                    </b>
+                        <p class="pb-5">
+                            Once rewards have been transferred, they are subjeted to the terms of the Loyalty Program to which they were transferred.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <form id="attachMemberForm">
+        <div class="modal fade" id="attachMemberModal" tabindex="-1" aria-labelledby="attachMemberModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="attachMemberModalLabel">Transfer Your Miles</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                    </div>
+                    <div id="body-content" class="modal-body">
+                        <p class="lead text-center">Link your <b class="programName"></b> account to start</p>
+                        <p class="text-center">Once linked, we will use this membership for your future miles transfers.</p>
+
+                        <input type="hidden" name="inputProgramID" id="inputProgramID">
+                        <!-- <input type="hidden" name="inputMemberID" id="inputMemberID"> -->
+                        <input type="hidden" name="inputUserID" id="inputUserID">
+
+                        <div class="form-group mt-3">
+                            <label for="message-text" class="col-form-label">Primary Cardholder</label>
+                            <input type="text" class="form-control" id="inputUserCard" name="inputUserCard" required>
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="message-text" class="col-form-label">Member #</label>
+                            <input type="text" class="form-control" id="inputAttachMemberID" name="inputAttachMemberID" required>
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="message-text" class="col-form-label">Confirm Member #</label>
+                            <input type="text" class="form-control" id="inputConfirmMemberID" name="inputConfirmMemberID" required>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button name="save" type="submit" class="btn btn-success btn-block">Save Membership</button>
+                        <p class="pb-5 text-center">
+                            Please ensure that your Loyalty Program membership name matches your cardholder name or transfers may be rejected
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="transferMilesModalLabel">Success!</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="window.location = window.location">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div id="body-content" class="modal-body text-center">
+                    <p class="lead">Your <b class="rates"></b> <b class="currency"></b> are on their way to your <span class="programName"></span> account.</p>
+                    <p class="lead">We'll send you an email within 5 days when they've received the transfer.</p>
+
+                    <div class="d-flex align-items-center justify-content-around grey-box">
+
+                        <p class="lead m-auto">
+                            <b class="text-success font-weight-bold">CONFIRM CODE</b><br> CONFIRMATION CODE
+                        </p>
+
+                        <div>
+                            <i class="fas fa-print" style="font-size: 30px;"></i>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {% include './global/footer.html' %} {% include './global/scripts.html' %}
+
+    <script>
+        $(function() {
+            $(document).on("keydown", ":input:not(textarea)", function(event) {
+                if (event.key == "Enter") {
+                    event.preventDefault();
+                }
+            });
+            var memberships = '{{data["user_membership"]|tojson|safe}}'
+            var amountAvailable = parseInt('{{data["user"]["credits"]}}')
+            var loyaltyId = ""
+
+            var isValid = false
+            var isCfmValid = false
+
+            $(".transferMilesBtn").click((e) => {
+                const {
+                    loyalty_id,
+                    loyalty_name,
+                    loyalty_unit,
+                    processing_time,
+                    desscription,
+                    enrollment_link,
+                    terms_link,
+                    validation,
+                    isFeatured
+                } = JSON.parse(e.target.dataset.item)
+                const membershipJson = JSON.parse(memberships);
+                const membership_id = membershipJson[loyalty_id]
+                loyaltyId = loyalty_id
+
+                if (membership_id) {
+                    if (loyalty_id != $("#inputProgramID").val()) {
+                        $("#inputProgramID").val(loyalty_id)
+                        $("#inputMemberID").val(membership_id)
+                        $("#selected_member").text(membership_id)
+
+                        $("#inputTransferAmount").val(null)
+                        $("#amountUsing").text("-")
+                        $("#rates").text("-")
+                        $("#amountRemaining").text(amountAvailable)
+
+                        $(".programName").text(loyalty_name)
+                        $(".currency").text(loyalty_unit)
+                    }
+
+                    $('#transferMilesModal').modal('show');
+
+                } else {
+                    $("#inputProgramID").val(loyalty_id)
+                    $("#inputUserID").val(sessionStorage.getItem('userId').slice(1, -1))
+                    $("#selected_member").text(membership_id)
+
+                    $(".programName").text(loyalty_name)
+                    $(".currency").text(loyalty_unit)
+
+                    $('#attachMemberModal').modal('show');
+                }
+
+            })
+
+            $("#transferForm").submit((e) => {
+
+                formData = new FormData(e.target);
+
+                for (var key of formData.keys()) {
+                    console.log(`${key} : ${formData.get(key)}`);
+                }
+                e.preventDefault();
+
+                // Call API 
+                $(async() => {
+                    const transactionBody = JSON.stringify({
+                        "loyalty_id": formData.get("inputProgramID"),
+                        "user_id": sessionStorage.getItem('userId').slice(1, -1),
+                        "member_id": formData.get("inputMemberID"),
+                        "transaction_date": new Date().toLocaleDateString(),
+                        "amount": parseInt(formData.get("inputTransferAmount")),
+                        "additional_info": null,
+                        "outcome_code": null
+                    })
+
+                    // create bank transaction
+                    const transactionResponse = await fetch('{{data["proxyUrl"]}}:5005/bank/transaction/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: transactionBody,
+                    })
+
+                    const transactionData = await transactionResponse.json()
+
+                    
+
+                    if (transactionResponse.status == 201) {
+                        var balance = amountAvailable - parseInt(formData.get("inputTransferAmount"))
+
+                        // update user points balance
+                        const updateResponse = await fetch('{{data["proxyUrl"]}}:5002/bank/user/update/' + sessionStorage.getItem('userId').slice(1, -1), {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                "points": balance
+                            })
+                        })
+
+                        $('#transferMilesModal').modal('hide');
+                        $('#resultModal').modal('show');
+
+                        // get user first name and last name
+                        const userResponse = await fetch('{{data["proxyUrl"]}}:5002/bank/user/' + sessionStorage.getItem('userId').slice(1, -1))
+                        const userData = await userResponse.json()
+
+                        // get bank details
+                        const bankId = "BANKABC"
+
+                        const bankResponse = await fetch('{{data["ascendaUrl"]}}:5001/ascenda/bank/' + bankId)
+                        const bankData = await bankResponse.json()
+
+
+                        // create ascenda transacion
+                        const ascTransactionBody = JSON.stringify({
+                            "loyalty_id": formData.get("inputProgramID"),
+                            "member_id": formData.get("inputMemberID"),
+                            "member_name_first": userData["user"][0].firstname,
+                            "member_name_last": userData["user"][0].lastname,
+                            "transaction_date": new Date().toLocaleDateString(),
+                            "amount": parseInt(formData.get("inputTransferAmount")),
+                            "reference_num": transactionData.reference_num,
+                            "partner_code": bankData["bank"][0].bank_id,
+                            "bank_user_id": sessionStorage.getItem('userId').slice(1, -1),
+                            "additional_info": transactionData.additional_info,
+                            "outcome_code": transactionData.outcome_code
+                        })
+
+                        console.log(ascTransactionBody);
+
+                        const ascTransactionResponse = await fetch('{{data["ascendaUrl"]}}:5004/ascenda/transaction/create', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: ascTransactionBody,
+                        })
+
+                        const ascTransactionData = await ascTransactionResponse.json()
+
+                    }
+
+                })
+
+            })
+
+            $("#resultModal").on("hidden", function() {
+                console.log("close")
+            });
+
+            $("#attachMemberForm").submit((e) => {
+
+                formData = new FormData(e.target);
+
+                for (var key of formData.keys()) {
+                    console.log(`${key} : ${formData.get(key)}`);
+                }
+                e.preventDefault();
+
+                $(async()=>{
+                    if (isValid && isCfmValid){
+                        // create loyalty user
+                        const loyaltyUserBody = JSON.stringify({
+                            "user_id": sessionStorage.getItem('userId').slice(1, -1),
+                            "loyalty_id": loyaltyId,
+                            "member_id": formData.get("inputAttachMemberID"),
+                        })
+    
+                        const loyaltyUserResponse = await fetch('{{data["proxyUrl"]}}:5008/bank/loyalty/user/create', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: loyaltyUserBody,
+                        })
+    
+                        const loyaltyUserData = await loyaltyUserResponse.json()
+                    }else{
+                        alert("Input Invalid")
+                    }
+                })
+
+                
+
+                $('#attachMemberModal').modal('hide');
+
+                $("#inputProgramID").val(loyaltyId)
+                $("#inputMemberID").val(formData.get("inputAttachMemberID"))
+                $("#selected_member").text(formData.get("inputAttachMemberID"))
+
+                $('#transferMilesModal').modal('show');
+
+            })
+
+            $("#inputAttachMemberID").change((e) => {
+                $(async() => {
+                    console.log(loyaltyId)
+                    const response = await fetch('{{data["ascendaUrl"]}}:5006/ascenda/loyalty/membership/' + loyaltyId + "/" + e.target.value)
+                    const data = await response.json()
+                    isValid = true
+
+                    if (response.status == 400){
+                        alert("Membership format invalid!")
+                        isValid = false
+                    }
+                })
+            })
+
+            $("#inputConfirmMemberID").change((e) => {
+                $(async() => {
+                    const response = await fetch('{{data["ascendaUrl"]}}:5006/ascenda/loyalty/membership/' + loyaltyId + "/" + e.target.value)
+                    const data = await response.json()
+                    isCfmValid = true
+
+                    if (response.status == 400){
+                        alert("Membership format invalid!")
+                        isCfmValid = false
+                    }else if ($("#inputAttachMemberID").val() != e.target.value){
+                        alert("Membership not match!")
+                        isCfmValid = false
+                    }
+                })
+            })
+
+            $("#inputTransferAmount").change((e) => {
+                let amountUsing = parseInt(e.target.value)
+                $("#amountUsing").text(amountUsing)
+                $(".rates").text(amountUsing)
+                $("#amountRemaining").text(amountAvailable - amountUsing)
+            })
+        })
+    </script>
+
+</body>
+
+</html>

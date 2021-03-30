@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Page</title>
+
+    {% include './global/stylesheets.html' %}
+</head>
+
+<body class="bg-light">
+
+    {% include './global/header.html' %}
+
+
+    <div class="container-fluid" style="max-width: 95%; margin: 10px auto;">
+        <h3>Transaction Details</h3>
+        <div class="float-right">
+            <button class="btn btn-primary" onclick="pollResults()">Poll Results</button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped mt-10">
+                <thead>
+                    <tr>
+                        <th scope="col">Transaction ID</th>
+                        <th scope="col">Program ID</th>
+                        <th scope="col">Member ID</th>
+                        <th scope="col">Transfer Date</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+
+        
+    </div>
+
+    <div id="result">
+
+    </div>
+
+    {% include './global/scripts.html' %}
+
+    <script>
+        const pollResults = async () => {
+            try {
+                $("#tableBody").empty()
+                const response = await fetch('{{data["proxyUrl"]}}:5005/bank/transaction')
+                const data = await response.json()
+                
+                const transactions = data.transaction
+
+                const outcome_codes = JSON.parse('{{data["outcome_codes"]|tojson|safe}}')
+                console.log(transactions[0]);
+                for (const transaction of transactions) {
+                    const transaction_status = (transaction['outcome_code'] == "" || transaction['outcome_code'] == 0 || transaction['outcome_code'] == null ) ? "Pending" : outcome_codes[transaction['additional_info']]
+                    const row = 
+                        "<tr>" +
+                            "<td>" + transaction.reference_num + "</td>" + 
+                            "<td>" + transaction.loyalty_id + "</td>" + 
+                            "<td>" + transaction.member_id + "</td>" +
+                            "<td>" + transaction.transaction_date + "</td>" +
+                            "<td>" + transaction.amount + "</td>" +
+                            "<td>" + transaction_status + "</td>" +
+                        "</tr>";
+                    $("#tableBody").append(row) 
+                }
+            } catch (e) {
+                console.log(e)
+            }
+        }
+    </script>
+</body>
+
+</html>

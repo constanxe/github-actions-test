@@ -1,0 +1,36 @@
+/* body{
+    height: 100vh!important;
+    overflow: auto;
+} */
+
+body::-webkit-scrollbar{
+    width: 5px;
+    background-color: gainsboro;
+}
+
+body::-webkit-scrollbar-thumb{
+    background-color: grey;
+    border-radius: 10px;
+}
+
+.grey-box {
+    background-color: gainsboro;
+    padding: 10px 10px;
+    border-radius: 5px;
+}
+
+.grey-box p {
+    font-size: smaller;
+}
+
+@media (min-width: 768px) { 
+    .grey-box {
+        padding: 10px 30px;
+    }
+}
+
+@media (min-width: 1200px) { 
+    .grey-box {
+        padding: 10px 50px;
+    }
+}

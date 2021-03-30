@@ -1,0 +1,11 @@
+version: "3.7"
+services:
+  frontend:
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "80:5000"
+    environment: 
+      - proxyUrl=http://100.26.59.107
+      - ascendaUrl=http://ascenda-lb-1398984097.us-east-1.elb.amazonaws.com

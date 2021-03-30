@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Page</title>
+
+    {% include './global/stylesheets.html' %}
+</head>
+
+<body class="bg-light">
+
+    {% include './global/header.html' %}
+
+    <div class="container-fluid" style="max-width: 95%; margin: 10px auto;">
+        <h3>Transaction Details</h3>
+        <table class="table table-striped mt-10">
+            <thead>
+                <tr>
+                    <th scope="col">Transaction ID</th>
+                    <th scope="col">Program ID</th>
+                    <th scope="col">Member ID</th>
+                    <th scope="col">Transfer Date</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deteleModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Are you sure you want to delete?</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Transaction ID: <b><span id="transId">hello</span></b></p>
+                    <p>Program ID: <b><span id="programId"></span></b></p>
+                    <p>Member ID: <b><span id="memberId"></span></b></p>
+                    <p>Transfer Date: <b><span id="transDate"></span></b></p>
+                    <p>Amount: <b><span id="amount"></span></b></p>
+                    <p>Status: <b><span id="status"></span></b></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger confirmDeleteButton">Yes, Delete!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Modal -->
+    <div class="modal fade" id="notiModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Delete Success</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>You have successfully delete that record.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="window.location = window.location">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="result">
+
+    </div>
+
+    {% include './global/scripts.html' %}
+
+    <script>
+        $(async() => {
+            try {
+                const response = await fetch('{{data["proxyUrl"]}}:5005/bank/transaction/user/' + sessionStorage.getItem('userId').slice(1, -1))
+                const data = await response.json()
+                const transactions = data.transaction
+
+                const outcome_codes = JSON.parse('{{data["outcome_codes"]|tojson|safe}}')
+
+                for (const transaction of transactions) {
+                    const transaction_status = transaction['outcome_code'] == null ? "Pending" : outcome_codes[transaction['additional_info']]
+                    const row =
+                        "<tr>" +
+                        "<td>" + transaction.reference_num + "</td>" +
+                        "<td>" + transaction.loyalty_id + "</td>" +
+                        "<td>" + transaction.member_id + "</td>" +
+                        "<td>" + transaction.transaction_date + "</td>" +
+                        "<td>" + transaction.amount + "</td>" +
+                        "<td>" + transaction_status + "</td>" +
+                        "<td><button id = \"" + transaction.reference_num + "\" type = \"button\" class=\"btn btn-outline-danger deleteButton\">Delete</button></td>" +
+                        "</tr>";
+                    $("#tableBody").append(row)
+                }
+            } catch (e) {
+                console.log(e)
+            }
+
+            $(function() {
+                $('.deleteButton').click(function() {
+                    $(async() => {
+                        const response = await fetch('{{data["proxyUrl"]}}:5005/bank/transaction/' + $(this).attr('id'))
+                        const data = await response.json()
+                        var trans = data.transaction[0]
+
+                        if (response.status == 200) {
+                            var status = trans.outcome_code == null ? "Pending" : trans.additional_info
+
+                            $("#transId").text(trans.reference_num)
+                            $("#programId").text(trans.loyalty_id)
+                            $("#memberId").text(trans.member_id)
+                            $("#transDate").text(trans.transaction_date)
+                            $("#amount").text(trans.amount)
+                            $("#status").text(status)
+
+                            $('#deteleModal').modal('show');
+                        } else
+                            alert("Please try again later!")
+                    })
+                })
+
+                $('.confirmDeleteButton').click(function() {
+                    $(async() => {
+                        $('#deteleModal').modal('hide');
+
+                        const bankResponse = await fetch('{{data["proxyUrl"]}}:5005/bank/transaction/delete/' + $("#transId").text())
+                        const bankData = await bankResponse.json()
+
+                        if (bankResponse.status == 201) {
+                            const ascendaResponse = await fetch("http://localhost:5004/ascenda/transaction/delete/" + $("#transId").text())
+                            const ascendaData = await ascendaResponse.json()
+                            if (ascendaResponse.status == 201)
+                                $('#notiModal').modal('show');
+
+                        } else
+                            alert("Please try again later!")
+                    })
+                })
+            });
+        })
+    </script>
+</body>
+
+</html>

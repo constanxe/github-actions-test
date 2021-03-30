@@ -1,0 +1,31 @@
+version: "3.7"
+services:
+  bank_loyalty_user:
+    build: 
+      context: ./bank_loyalty_user
+      dockerfile: Dockerfile
+    ports:
+      - "5008:5008"
+    environment: 
+      - dbURL=mysql+mysqlconnector://admin:itsaadmin@bank.c8lpmru5pno3.us-east-1.rds.amazonaws.com:3306/cs301_team1_bank
+      - ascendaUrl=http://ascenda-lb-1398984097.us-east-1.elb.amazonaws.com
+  
+  bank_transaction:
+    build:
+      context: ./bank_transaction
+      dockerfile: Dockerfile
+    ports:
+      - "5005:5005"
+    environment: 
+      - dbURL=mysql+mysqlconnector://admin:itsaadmin@bank.c8lpmru5pno3.us-east-1.rds.amazonaws.com:3306/cs301_team1_bank
+      - ascendaUrl=http://ascenda-lb-1398984097.us-east-1.elb.amazonaws.com
+  
+  bank_user:
+    build:
+      context: ./bank_user
+      dockerfile: Dockerfile
+    ports:
+      - "5002:5002"
+    environment: 
+      - dbURL=mysql+mysqlconnector://admin:itsaadmin@bank.c8lpmru5pno3.us-east-1.rds.amazonaws.com:3306/cs301_team1_bank
+      - ascendaUrl=http://ascenda-lb-1398984097.us-east-1.elb.amazonaws.com

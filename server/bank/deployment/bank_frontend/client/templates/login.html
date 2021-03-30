@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+
+    {% include './global/stylesheets.html' %}
+</head>
+
+<body class="bg-light">
+
+    <div class="container d-flex flex-column justify-content-center align-items-center" style="min-height: 90vh;">
+        <h1>Bank ABC</h1>
+        <form style="margin-top: 15px;">
+            <div class="mb-3">
+                <label for="inputUsername1" class="form-label">Username</label>
+                <input type="text" class="form-control" id="inputUsername" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+                <label for="inputPassword" class="form-label">Password</label>
+                <input type="password" class="form-control" id="inputPassword">
+            </div>
+            <div id="error"></div>
+            <button type="button" class="btn btn-primary" onclick="handleSubmit()">Login</button>
+        </form>
+    </div>
+
+
+    {% include './global/scripts.html' %}
+
+    <script>
+        function handleSubmit() {
+            $(async() => {
+                const username = document.getElementById("inputUsername").value;
+                const password = document.getElementById("inputPassword").value;
+
+                const fetchBody = JSON.stringify({
+                    "username": username,
+                    "password": password
+                })
+
+                const response = await fetch('{{data["proxyUrl"]}}:5002/bank/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: fetchBody,
+                })
+
+                const data = await response.json()
+                console.log(data)
+
+                if (response.status == 200) {
+                    sessionStorage.setItem('userId', JSON.stringify(data.userId));
+
+                    setCookie('userId', JSON.stringify(data.userId), 5);
+                    window.location.replace("/");
+                } else {
+                    showError();
+                }
+            })
+        }
+
+        function showError() {
+            $("#error").html("<p style='color: red;'>Invalid Username/Password</p>")
+        }
+    </script>
+</body>
+
+</html>
