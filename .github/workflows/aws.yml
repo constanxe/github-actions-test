@@ -136,4 +136,4 @@ jobs:
         task-definition: loyalty-task-definition.json
         service: loyalty-service
         cluster: loyalty-cluster
-        wait-for-service-stability: true
+        wait-for-service-stability: false
