@@ -5,7 +5,7 @@ import re
 
 app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/cs301_team1_ascenda'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://USERNAME:PASSWORD@ascenda-loyalty.canszqrplode.us-east-1.rds.amazonaws.com/cs301_team1_ascenda'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://admin:itsaadmin@ascenda-loyalty-db.cq4bzcmfnjpo.us-east-1.rds.amazonaws.com/cs301_team1_ascenda'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
  
 db = SQLAlchemy(app)
@@ -120,7 +120,7 @@ def delete_loyalty(LoyaltyId):
         db.session.commit()
         
     except:
-        return jsonify({"message": "An error occurred updating the record."}),500
+        return jsonify({"message": "An error occurred deleting the record."}),500
 
     return jsonify(loyalty_detail.json()), 201
 

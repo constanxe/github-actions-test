@@ -12,7 +12,7 @@ import os
 
 app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/cs301_team1_ascenda'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://USERNAME:PASSWORD@ascenda-loyalty.canszqrplode.us-east-1.rds.amazonaws.com/cs301_team1_ascenda'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://admin:itsaadmin@ascenda-transaction-db.cq4bzcmfnjpo.us-east-1.rds.amazonaws.com/cs301_team1_ascenda'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -136,6 +136,30 @@ def update_transaction(TransactionId):
         return jsonify({"message": "An error occurred updating the transaction."}),500
 
     return jsonify(transaction_info.json()),201
+
+# delete loyalty transaction record
+@app.route("/ascenda/transaction/deleteloyalty/<string:LoyaltyId>")
+def delete_transaction_loyalty(LoyaltyId):
+    try:
+        AscendaTransaction.query.filter_by(loyalty_id=LoyaltyId).delete()
+        db.session.commit()
+        
+    except:
+        return jsonify({"message": "An error occurred deleting the record."}),500
+
+    return jsonify({"message": "Transactions deleted successfully"}), 201
+
+# delete partner transaction record
+@app.route("/ascenda/transaction/deletebank/<string:PartnerCode>")
+def delete_transaction_partner(PartnerCode):
+    try:
+        AscendaTransaction.query.filter_by(partner_code=PartnerCode).delete()
+        db.session.commit()
+        
+    except:
+        return jsonify({"message": "An error occurred deleting the record."}),500
+
+    return jsonify({"message": "Transactions deleted successfully"}), 201
 
 if __name__ == '__main__': # if it is the main program you run, then start flask
     # with docker
