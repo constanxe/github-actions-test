@@ -100,9 +100,9 @@ jobs:
     # - name: Download task definition [bank]
     #   run: |
     #     aws ecs describe-task-definition --task-definition bank --query taskDefinition > bank-task-definition.json
-    # - name: Download task definition [loyalty]
-    #   run: |
-    #     aws ecs describe-task-definition --task-definition loyalty --query taskDefinition > loyalty-task-definition.json
+    - name: Download task definition [loyalty]
+      run: |
+        aws ecs describe-task-definition --task-definition loyalty --query taskDefinition > loyalty-task-definition.json
     
     - name: Fill in the new image ID in the Amazon ECS task definition [bank]
       id: bank-task-def
