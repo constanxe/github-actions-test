@@ -1,9 +1,9 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:us-east-1:717942231127:task-definition/loyalty:2",
+    "taskDefinitionArn": "arn:aws:ecs:us-east-1:717942231127:task-definition/loyalty:1",
     "containerDefinitions": [
         {
             "name": "loyalty-container",
-            "image": "717942231127.dkr.ecr.us-east-1.amazonaws.com/ascenda:e188783e7e5b1457c1f7d392e1d6b36841a97e0a",
+            "image": "717942231127.dkr.ecr.us-east-1.amazonaws.com/ascenda:loyalty",
             "cpu": 0,
             "portMappings": [
                 {
@@ -30,7 +30,7 @@
     "taskRoleArn": "arn:aws:iam::717942231127:role/ecsTaskExecutionRole",
     "executionRoleArn": "arn:aws:iam::717942231127:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
-    "revision": 2,
+    "revision": 1,
     "volumes": [],
     "status": "ACTIVE",
     "requiresAttributes": [
