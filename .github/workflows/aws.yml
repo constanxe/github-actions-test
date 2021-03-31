@@ -88,7 +88,7 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: ascenda
-        IMAGE_TAG: 1.0.0
+        IMAGE_TAG: ${{ github.sha }}
       run: |
         # Build a docker container and
         # push it to ECR so that it can
@@ -135,7 +135,7 @@ jobs:
     - name: Deploy Amazon ECS task definition [loyalty]
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: ${{ steps.loyalty-task-def.outputs.task-definition }}
+        task-definition: loyalty-task-definition.json
         service: loyalty-service
         cluster: loyalty-cluster
         wait-for-service-stability: false
