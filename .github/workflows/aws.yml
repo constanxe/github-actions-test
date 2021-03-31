@@ -71,18 +71,22 @@ jobs:
       run: |
         aws ecs describe-task-definition --task-definition exchange_rate --query taskDefinition > exchange-task-definition.json
 
+    # - name: CREATE CLUSTER IF DH ?
+    #   run: |
+    #     aws ecs create-cluster --region us-east-1 --cluster-name default
+
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: exchange-task-definition.json
-        container-name: exchange_rate_container
+        task-definition: transaction-task-definition.json
+        container-name: transaction-container
         image: ${{ steps.build-image.outputs.image }}
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: exchange-service
-        cluster: exchange-cluster
+        service: transaction-service
+        cluster: transaction-cluster
         wait-for-service-stability: true
