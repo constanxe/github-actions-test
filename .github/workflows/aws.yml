@@ -130,10 +130,10 @@ jobs:
     #     cluster: transaction-cluster
     #     wait-for-service-stability: true
 
-    # - name: Deploy Amazon ECS task definition [loyalty]
-    #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-    #   with:
-    #     task-definition: ${{ steps.task-def.outputs.task-definition }}
-    #     service: loyalty-service
-    #     cluster: loyalty-cluster
-    #     wait-for-service-stability: true
+    - name: Deploy Amazon ECS task definition [loyalty]
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: loyalty-task-definition.json
+        service: loyalty-service
+        cluster: loyalty-cluster
+        wait-for-service-stability: true
