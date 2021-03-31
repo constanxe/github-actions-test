@@ -69,7 +69,7 @@ jobs:
 
     - name: Download task definition
       run: |
-        aws ecs describe-task-definition --task-definition exchange_rate --query taskDefinition > exchange-task-definition.json
+        aws ecs describe-task-definition --task-definition loyalty --query taskDefinition > loyalty-task-definition.json
 
     # - name: CREATE CLUSTER IF DH ?
     #   run: |
