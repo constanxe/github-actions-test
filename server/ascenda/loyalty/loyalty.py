@@ -12,7 +12,7 @@ db = SQLAlchemy(app)
 CORS(app)
 
 class AscendaLoyalty(db.Model):
-    __tablename__ = 'ascenda_loyalty'
+    __tablename__ = 'ascenda-loyalty'
 
     loyalty_id = db.Column(db.String(120), primary_key=True)
     loyalty_name = db.Column(db.String(120), unique=True, nullable=False)
