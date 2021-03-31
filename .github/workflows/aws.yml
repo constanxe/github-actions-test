@@ -83,20 +83,22 @@ jobs:
     #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
     #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-    # - name: Build, tag, and push image to Amazon ECR [loyalty]
-    #   id: build-image
-    #   env:
-    #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-    #     ECR_REPOSITORY: ascenda
-    #     IMAGE_TAG: loyalty
-    #   run: |
-    #     # Build a docker container and
-    #     # push it to ECR so that it can
-    #     # be deployed to ECS.
-    #     cd server/ascenda/loyalty
-    #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-    #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+    - name: Build, tag, and push image to Amazon ECR [loyalty]
+      id: build-loyalty-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ascenda
+        IMAGE_TAG: 1.0.0
+      run: |
+        # Build a docker container and
+        # push it to ECR so that it can
+        # be deployed to ECS.
+        cd server/ascenda/loyalty
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
     # - name: Download task definition [transaction]
     #   run: |
@@ -115,12 +117,12 @@ jobs:
     #     image: ${{ steps.build-image.outputs.image }}
 
     - name: Fill in the new image ID in the Amazon ECS task definition [loyalty]
-      id: task-def
+      id: loyalty-task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: loyalty-task-definition.json
         container-name: loyalty-container
-        image: 717942231127.dkr.ecr.us-east-1.amazonaws.com/ascenda:loyalty
+        image: ${{ steps.build-loyalty-image.outputs.image }}
 
     # - name: Deploy Amazon ECS task definition [transaction]
     #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
@@ -133,7 +135,7 @@ jobs:
     - name: Deploy Amazon ECS task definition [loyalty]
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: loyalty-task-definition.json
+        task-definition: ${{ steps.loyalty-task-def.outputs.task-definition }}
         service: loyalty-service
         cluster: loyalty-cluster
         wait-for-service-stability: false
