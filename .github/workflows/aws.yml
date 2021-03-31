@@ -66,27 +66,23 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-    
+
     - name: Download task definition
       run: |
-        aws ecs describe-task-definition --task-definition loyalty --query taskDefinition > loyalty-task-definition.json
         aws ecs describe-task-definition --task-definition exchange_rate --query taskDefinition > exchange-task-definition.json
-        aws ecs describe-task-definition --task-definition transaction --query taskDefinition > transaction-task-definition.json
 
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: loyalty-task-definition.json
-        container-name: loyalty-container
+        task-definition: exchange-task-definition.json
+        container-name: exchange_rate_container
         image: ${{ steps.build-image.outputs.image }}
-
-
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: loyalty-service
-        cluster: loyalty-cluster
+        service: exchange-service
+        cluster: exchange-cluster
         wait-for-service-stability: true

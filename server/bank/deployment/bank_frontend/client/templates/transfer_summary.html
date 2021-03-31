@@ -138,7 +138,7 @@
                         const bankData = await bankResponse.json()
 
                         if (bankResponse.status == 201) {
-                            const ascendaResponse = await fetch("http://localhost:5004/ascenda/transaction/delete/" + $("#transId").text())
+                            const ascendaResponse = await fetch('{{data["proxyUrl"]}}:5004/ascenda/transaction/delete/' + $("#transId").text())
                             const ascendaData = await ascendaResponse.json()
                             if (ascendaResponse.status == 201)
                                 $('#notiModal').modal('show');
