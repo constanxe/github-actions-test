@@ -120,7 +120,7 @@ jobs:
       with:
         task-definition: loyalty-task-definition.json
         container-name: loyalty-container
-        # image: ${{ steps.build-image.outputs.image }}
+        image: 717942231127.dkr.ecr.us-east-1.amazonaws.com/ascenda:loyalty
 
     # - name: Deploy Amazon ECS task definition [transaction]
     #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
