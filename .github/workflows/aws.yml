@@ -41,20 +41,18 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    # Tests
-    - name: Run API Tests
-      id: run-newman
-      uses: anthonyvscode/newman-action@v1
+    # Verify Changed files
+    - name: Verify Changed files
+      id: changed_files
+      uses: tj-actions/verify-changed-files@v5.5
       with:
-        collection: ITSA.postman_collection.json
-        reporters: cli
-
-    - name: Output summary to console
-      run: echo ${{ steps.run-newman.outputs.summary }}
+        files: |
+          server
 
     # AWS
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
+      if: steps.changed_files.outputs.files_changed == 'true'
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -62,6 +60,7 @@ jobs:
 
     - name: Login to Amazon ECR
       id: login-ecr
+      if: steps.changed_files.outputs.files_changed == 'true'
       uses: aws-actions/amazon-ecr-login@v1
 
     # - name: Build, tag, and push image to Amazon ECR [bank]
@@ -82,10 +81,11 @@ jobs:
     #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
     - name: Build, tag, and push image to Amazon ECR [loyalty]
       id: build-loyalty-image
+      if: contains(steps.changed_files.outputs.changed_files, 'server/loyalty')
       env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: ascenda
-        IMAGE_TAG: ${{ github.sha }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ascenda
+          IMAGE_TAG: ${{ github.sha }}
       run: |
         # Build a docker container and
         # push it to ECR so that it can
@@ -101,6 +101,7 @@ jobs:
     #   run: |
     #     aws ecs describe-task-definition --task-definition bank --query taskDefinition > bank-task-definition.json
     - name: Download task definition [loyalty]
+      if: contains(steps.changed_files.outputs.changed_files, 'server/loyalty')
       run: |
         aws ecs describe-task-definition --task-definition loyalty --query taskDefinition > loyalty-task-definition.json
     
@@ -113,6 +114,7 @@ jobs:
     #     image: ${{ steps.build-bank-image.outputs.image }}
     - name: Fill in the new image ID in the Amazon ECS task definition [loyalty]
       id: loyalty-task-def
+      if: contains(steps.changed_files.outputs.changed_files, 'server/loyalty')
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: loyalty-task-definition.json
@@ -127,9 +129,22 @@ jobs:
     #     cluster: bank-cluster
     #     wait-for-service-stability: true
     - name: Deploy Amazon ECS task definition [loyalty]
+      if: contains(steps.changed_files.outputs.changed_files, 'server/loyalty')
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.loyalty-task-def.outputs.task-definition }}
         service: loyalty-service
         cluster: loyalty-cluster
         wait-for-service-stability: true
+
+
+    # Tests
+    - name: Run API Tests
+      id: run-newman
+      uses: anthonyvscode/newman-action@v1
+      with:
+        collection: ITSA.postman_collection.json
+        reporters: cli
+
+    - name: Output summary to console
+      run: echo ${{ steps.run-newman.outputs.summary }}
