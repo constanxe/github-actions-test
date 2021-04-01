@@ -81,7 +81,7 @@ jobs:
     #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
     - name: Build, tag, and push image to Amazon ECR [loyalty]
       id: build-loyalty-image
-      if: contains(steps.changed_files.outputs.changed_files, 'server/loyalty')
+      if: contains(steps.changed_files.outputs.changed_files, 'server/ascenda/loyalty')
       env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ascenda
