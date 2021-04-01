@@ -47,8 +47,6 @@ jobs:
       uses: tj-actions/verify-changed-files@v5.5
       with:
         files: |
-          # server/bank
-          # server/ascenda
           server/ascenda/loyalty
 
     # AWS
