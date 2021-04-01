@@ -48,91 +48,100 @@ jobs:
     #     files: |
     #       server/ascenda/loyalty/loyalty.py
 
+    - name: Verify Changed files
+      id: changed_files
+      uses: dorny/paths-filter@v2
+      with:
+        filters: |
+          ascenda:
+            - 'server/ascenda/**'
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       # if: steps.changed_files.outputs.files_changed == 'true'
+      if: steps.changes.outputs.ascenda == 'true'
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      # if: steps.changed_files.outputs.files_changed == 'true'
-      uses: aws-actions/amazon-ecr-login@v1
+    # - name: Login to Amazon ECR
+    #   id: login-ecr
+    #   # if: steps.changed_files.outputs.files_changed == 'true'
+    #   uses: aws-actions/amazon-ecr-login@v1
 
-    # services
-    # - name: Build, tag, and push image to Amazon ECR [loyalty]
-    #   id: build-loyalty-image
-    #   if: contains(steps.changed_files.outputs.changed_files, 'server/ascenda/loyalty/loyalty.py')
+    # # # services
+    # # - name: Build, tag, and push image to Amazon ECR [loyalty]
+    # #   id: build-loyalty-image
+    # #   if: contains(steps.changed_files.outputs.changed_files, 'server/ascenda/loyalty/loyalty.py')
+    # #   env:
+    # #       ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+    # #       ECR_REPOSITORY: ascenda
+    # #       IMAGE_TAG: ${{ github.sha }}
+    # #   run: |
+    # #     # Build a docker container and push it to ECR so that it can be deployed to ECS.
+    # #     # cd server/ascenda/loyalty
+    # #     # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+    # #     # docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    # #     # docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    # #     # docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    # #     # echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+
+    # - name: Build, tag, and push image to Amazon ECR [transaction]
+    #   id: build-transaction-image
     #   env:
-    #       ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-    #       ECR_REPOSITORY: ascenda
-    #       IMAGE_TAG: ${{ github.sha }}
+    #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+    #     ECR_REPOSITORY: ascenda
+    #     IMAGE_TAG: ${{ github.sha }}
     #   run: |
     #     # Build a docker container and push it to ECR so that it can be deployed to ECS.
-    #     # cd server/ascenda/loyalty
-    #     # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-    #     # docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-    #     # docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-    #     # docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-    #     # echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+    #     cd server/ascenda/transaction
+    #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+    #     docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
-    - name: Build, tag, and push image to Amazon ECR [transaction]
-      id: build-transaction-image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: ascenda
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        # Build a docker container and push it to ECR so that it can be deployed to ECS.
-        cd server/ascenda/transaction
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
-
-    # - name: Download task definition [loyalty]
-    #   if: contains(steps.changed_files.outputs.changed_files, 'server/ascenda/loyalty')
+    # # - name: Download task definition [loyalty]
+    # #   if: contains(steps.changed_files.outputs.changed_files, 'server/ascenda/loyalty')
+    # #   run: |
+    # #     aws ecs describe-task-definition --task-definition loyalty --query taskDefinition > loyalty-task-definition.json
+    # - name: Download task definition [transaction]
     #   run: |
-    #     aws ecs describe-task-definition --task-definition loyalty --query taskDefinition > loyalty-task-definition.json
-    - name: Download task definition [transaction]
-      run: |
-        aws ecs describe-task-definition --task-definition transaction --query taskDefinition > transaction-task-definition.json
+    #     aws ecs describe-task-definition --task-definition transaction --query taskDefinition > transaction-task-definition.json
 
-    # - name: Fill in the new image ID in the Amazon ECS task definition [loyalty]
-    #   id: loyalty-task-def
-    #   # if: contains(steps.changed_files.outputs.changed_files, 'server/ascenda/loyalty')
+    # # - name: Fill in the new image ID in the Amazon ECS task definition [loyalty]
+    # #   id: loyalty-task-def
+    # #   # if: contains(steps.changed_files.outputs.changed_files, 'server/ascenda/loyalty')
+    # #   uses: aws-actions/amazon-ecs-render-task-definition@v1
+    # #   with:
+    # #     task-definition: loyalty-task-definition.json
+    # #     container-name: loyalty-container
+    # #     image: ${{ steps.build-loyalty-image.outputs.image }}
+    # - name: Fill in the new image ID in the Amazon ECS task definition [transaction]
+    #   id: transaction-task-def
     #   uses: aws-actions/amazon-ecs-render-task-definition@v1
     #   with:
-    #     task-definition: loyalty-task-definition.json
-    #     container-name: loyalty-container
-    #     image: ${{ steps.build-loyalty-image.outputs.image }}
-    - name: Fill in the new image ID in the Amazon ECS task definition [transaction]
-      id: transaction-task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: transaction-task-definition.json
-        container-name: transaction-container
-        image: ${{ steps.build-transaction-image.outputs.image }}
+    #     task-definition: transaction-task-definition.json
+    #     container-name: transaction-container
+    #     image: ${{ steps.build-transaction-image.outputs.image }}
 
-    # - name: Deploy Amazon ECS task definition [loyalty]
-    #   id: deploy-loyalty
-    #   # if: contains(steps.changed_files.outputs.changed_files, 'server/ascenda/loyalty')
+    # # - name: Deploy Amazon ECS task definition [loyalty]
+    # #   id: deploy-loyalty
+    # #   # if: contains(steps.changed_files.outputs.changed_files, 'server/ascenda/loyalty')
+    # #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+    # #   with:
+    # #     task-definition: ${{ steps.loyalty-task-def.outputs.task-definition }}
+    # #     service: loyalty-service
+    # #     cluster: loyalty-cluster
+    # #     wait-for-service-stability: false
+    # - name: Deploy Amazon ECS task definition [transaction]
     #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
     #   with:
-    #     task-definition: ${{ steps.loyalty-task-def.outputs.task-definition }}
-    #     service: loyalty-service
-    #     cluster: loyalty-cluster
+    #     task-definition: ${{ steps.transaction-task-def.outputs.task-definition }}
+    #     service: transaction-service
+    #     cluster: transaction-cluster
     #     wait-for-service-stability: false
-    - name: Deploy Amazon ECS task definition [transaction]
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.transaction-task-def.outputs.task-definition }}
-        service: transaction-service
-        cluster: transaction-cluster
-        wait-for-service-stability: false
 
   # test:
   #   name: Test
