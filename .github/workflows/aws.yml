@@ -138,11 +138,11 @@ jobs:
         cluster: loyalty-cluster
         wait-for-service-stability: true
 
-
-    # Tests
+  # Tests
+  test:
+    needs: build
     - name: Run API Tests
       id: run-newman
-      needs: deploy-loyalty
       uses: anthonyvscode/newman-action@v1
       with:
         collection: ITSA.postman_collection.json
