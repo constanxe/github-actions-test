@@ -47,7 +47,7 @@ jobs:
       uses: tj-actions/verify-changed-files@v5.5
       with:
         files: |
-          server/ascenda/loyalty
+          server/ascenda/loyalty/*
 
     # AWS
     - name: Configure AWS credentials
