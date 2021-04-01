@@ -86,8 +86,8 @@ def update_loyalty(LoyaltyId):
         loyalty_info.enrollment_link = data["enrollment_link"]
     if "terms_link" in data:
         loyalty_info.terms_link = data["terms_link"]
-    if "validation" in data:
-        loyalty_info.validation = data["validation"]
+    # if "validation" in data:
+    #     loyalty_info.validation = data["validation"]
 
     try:
         db.session.commit()
