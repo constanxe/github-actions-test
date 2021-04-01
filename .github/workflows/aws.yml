@@ -144,7 +144,7 @@ jobs:
   #   steps:
     - name: Run API Tests
       id: run-newman
-      needs: deploy-loyalty
+      # needs: deploy-loyalty
       uses: anthonyvscode/newman-action@v1
       with:
         collection: ITSA.postman_collection.json
