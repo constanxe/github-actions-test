@@ -46,7 +46,7 @@ jobs:
       uses: tj-actions/verify-changed-files@v5.5
       with:
         files: |
-          server/ascenda/loyalty
+          server/ascenda/loyalty/loyalty.py
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -61,17 +61,17 @@ jobs:
       if: steps.changed_files.outputs.files_changed == 'true'
       uses: aws-actions/amazon-ecr-login@v1
 
-    # - name: Build, tag, and push image to Amazon ECR [bank]
-    #   id: build-bank-image
+    # - name: Build, tag, and push image to Amazon ECR [transaction]
+    #   id: build-transaction-image
     #   env:
     #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-    #     ECR_REPOSITORY: bank
+    #     ECR_REPOSITORY: transaction
     #     IMAGE_TAG: ${{ github.sha }}
     #   run: |
     #     # Build a docker container and
     #     # push it to ECR so that it can
     #     # be deployed to ECS.
-    #     cd server/ascenda/bank
+    #     cd server/ascenda/transaction
     #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
     #     docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
     #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
@@ -95,21 +95,21 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
-    # - name: Download task definition [bank]
+    # - name: Download task definition [transaction]
     #   run: |
-    #     aws ecs describe-task-definition --task-definition bank --query taskDefinition > bank-task-definition.json
+    #     aws ecs describe-task-definition --task-definition transaction --query taskDefinition > transaction-task-definition.json
     - name: Download task definition [loyalty]
       if: contains(steps.changed_files.outputs.changed_files, 'server/ascenda/loyalty')
       run: |
         aws ecs describe-task-definition --task-definition loyalty --query taskDefinition > loyalty-task-definition.json
     
-    # - name: Fill in the new image ID in the Amazon ECS task definition [bank]
-    #   id: bank-task-def
+    # - name: Fill in the new image ID in the Amazon ECS task definition [transaction]
+    #   id: transaction-task-def
     #   uses: aws-actions/amazon-ecs-render-task-definition@v1
     #   with:
-    #     task-definition: bank-task-definition.json
-    #     container-name: bank-container
-    #     image: ${{ steps.build-bank-image.outputs.image }}
+    #     task-definition: transaction-task-definition.json
+    #     container-name: transaction-container
+    #     image: ${{ steps.build-transaction-image.outputs.image }}
     - name: Fill in the new image ID in the Amazon ECS task definition [loyalty]
       id: loyalty-task-def
       if: contains(steps.changed_files.outputs.changed_files, 'server/ascenda/loyalty')
@@ -119,12 +119,12 @@ jobs:
         container-name: loyalty-container
         image: ${{ steps.build-loyalty-image.outputs.image }}
 
-    # - name: Deploy Amazon ECS task definition [bank]
+    # - name: Deploy Amazon ECS task definition [transaction]
     #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
     #   with:
-    #     task-definition: ${{ steps.bank-task-def.outputs.task-definition }}
-    #     service: bank-service
-    #     cluster: bank-cluster
+    #     task-definition: ${{ steps.transaction-task-def.outputs.task-definition }}
+    #     service: transaction-service
+    #     cluster: transaction-cluster
     #     wait-for-service-stability: true
     - name: Deploy Amazon ECS task definition [loyalty]
       id: deploy-loyalty
