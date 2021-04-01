@@ -35,7 +35,7 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    environment: development
+    # environment: development
 
     steps:
     - name: Checkout
@@ -47,7 +47,7 @@ jobs:
       uses: tj-actions/verify-changed-files@v5.5
       with:
         files: |
-          server
+          server/*
 
     # AWS
     - name: Configure AWS credentials
