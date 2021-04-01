@@ -47,7 +47,7 @@ jobs:
       uses: tj-actions/verify-changed-files@v5.5
       with:
         files: |
-          server/ascenda/loyalty/*
+          server/ascenda/loyalty
 
     # AWS
     - name: Configure AWS credentials
@@ -101,7 +101,7 @@ jobs:
     #   run: |
     #     aws ecs describe-task-definition --task-definition bank --query taskDefinition > bank-task-definition.json
     - name: Download task definition [loyalty]
-      if: contains(steps.changed_files.outputs.changed_files, 'server/loyalty')
+      if: contains(steps.changed_files.outputs.changed_files, 'server/ascenda/loyalty')
       run: |
         aws ecs describe-task-definition --task-definition loyalty --query taskDefinition > loyalty-task-definition.json
     
@@ -114,7 +114,7 @@ jobs:
     #     image: ${{ steps.build-bank-image.outputs.image }}
     - name: Fill in the new image ID in the Amazon ECS task definition [loyalty]
       id: loyalty-task-def
-      if: contains(steps.changed_files.outputs.changed_files, 'server/loyalty')
+      if: contains(steps.changed_files.outputs.changed_files, 'server/ascenda/loyalty')
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: loyalty-task-definition.json
@@ -130,7 +130,7 @@ jobs:
     #     wait-for-service-stability: true
     - name: Deploy Amazon ECS task definition [loyalty]
       id: deploy-loyalty
-      if: contains(steps.changed_files.outputs.changed_files, 'server/loyalty')
+      if: contains(steps.changed_files.outputs.changed_files, 'server/ascenda/loyalty')
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.loyalty-task-def.outputs.task-definition }}
