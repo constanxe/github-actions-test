@@ -47,7 +47,9 @@ jobs:
       uses: tj-actions/verify-changed-files@v5.5
       with:
         files: |
-          server/*
+          # server/bank
+          # server/ascenda
+          server/ascenda/loyalty
 
     # AWS
     - name: Configure AWS credentials
@@ -129,6 +131,7 @@ jobs:
     #     cluster: bank-cluster
     #     wait-for-service-stability: true
     - name: Deploy Amazon ECS task definition [loyalty]
+      id: deploy-loyalty
       if: contains(steps.changed_files.outputs.changed_files, 'server/loyalty')
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
@@ -141,6 +144,7 @@ jobs:
     # Tests
     - name: Run API Tests
       id: run-newman
+      needs: deploy-loyalty
       uses: anthonyvscode/newman-action@v1
       with:
         collection: ITSA.postman_collection.json
