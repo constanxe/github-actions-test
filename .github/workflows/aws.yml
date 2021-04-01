@@ -142,13 +142,13 @@ jobs:
     needs: [build]
     runs-on: ubuntu-latest
     steps:
-  - name: Run API Tests
-    id: run-newman
-    # needs: deploy-loyalty
-    uses: anthonyvscode/newman-action@v1
-    with:
-      collection: ITSA.postman_collection.json
-      reporters: cli
+    - name: Run API Tests
+      id: run-newman
+      # needs: deploy-loyalty
+      uses: anthonyvscode/newman-action@v1
+      with:
+        collection: ITSA.postman_collection.json
+        reporters: cli
 
-  - name: Output summary to console
-    run: echo ${{ steps.run-newman.outputs.summary }}
+    - name: Output summary to console
+      run: echo ${{ steps.run-newman.outputs.summary }}
