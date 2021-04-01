@@ -119,13 +119,6 @@ jobs:
         container-name: loyalty-container
         image: ${{ steps.build-loyalty-image.outputs.image }}
 
-    - name: Deploy Amazon ECS task definition [transaction]
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.transaction-task-def.outputs.task-definition }}
-        service: transaction-service
-        cluster: transaction-cluster
-        wait-for-service-stability: true
     - name: Deploy Amazon ECS task definition [loyalty]
       id: deploy-loyalty
       # if: contains(steps.changed_files.outputs.changed_files, 'server/ascenda/loyalty')
@@ -134,7 +127,14 @@ jobs:
         task-definition: ${{ steps.loyalty-task-def.outputs.task-definition }}
         service: loyalty-service
         cluster: loyalty-cluster
-        wait-for-service-stability: true
+        wait-for-service-stability: false
+    - name: Deploy Amazon ECS task definition [transaction]
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.transaction-task-def.outputs.task-definition }}
+        service: transaction-service
+        cluster: transaction-cluster
+        wait-for-service-stability: false
 
   # # Tests
   # test:
