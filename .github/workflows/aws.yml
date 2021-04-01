@@ -46,7 +46,7 @@ jobs:
       uses: tj-actions/verify-changed-files@v5.5
       with:
         files: |
-          server/ascenda/loyalty
+          server/ascenda/loyalty/loyalty.py
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -64,7 +64,7 @@ jobs:
     # services
     - name: Build, tag, and push image to Amazon ECR [loyalty]
       id: build-loyalty-image
-      if: contains(steps.changed_files.outputs.changed_files, 'server/ascenda/loyalty')
+      if: contains(steps.changed_files.outputs.changed_files, 'server/ascenda/loyalty/loyalty.py')
       env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ascenda
