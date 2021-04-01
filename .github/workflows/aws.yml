@@ -65,7 +65,7 @@ jobs:
       id: build-transaction-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: transaction
+        ECR_REPOSITORY: ascenda
         IMAGE_TAG: ${{ github.sha }}
       run: |
         # Build a docker container and
