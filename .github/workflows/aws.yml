@@ -41,24 +41,16 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    # - name: Verify Changed files
-    #   id: changed_files
-    #   uses: tj-actions/verify-changed-files@v5.5
-    #   with:
-    #     files: |
-    #       server/ascenda/loyalty/**
-
     - name: Verify Changed files
       id: changed_files
       uses: dorny/paths-filter@v2
       with:
         filters: |
           ascenda:
-            - 'server/ascenda/loyalty/**'
+            - 'server/ascenda/**'
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
-      # if: steps.changed_files.outputs.files_changed == 'true'
       if: steps.changed_files.outputs.ascenda == 'true'
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
