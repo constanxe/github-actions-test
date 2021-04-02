@@ -139,7 +139,7 @@ jobs:
     #     task-definition: ${{ steps.loyalty-task-def.outputs.task-definition }}
     #     service: loyalty-service
     #     cluster: loyalty-cluster
-    #     wait-for-service-stability: false
+    #     wait-for-service-stability: true
     - name: Deploy Amazon ECS task definition [transaction]
       if: steps.changed_files.outputs.ascenda-transaction == 'true'
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
@@ -147,7 +147,7 @@ jobs:
         task-definition: ${{ steps.transaction-task-def.outputs.task-definition }}
         service: transaction-service
         cluster: transaction-cluster
-        wait-for-service-stability: false
+        wait-for-service-stability: true
 
   # test:
   #   name: Test
