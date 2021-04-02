@@ -78,8 +78,8 @@ jobs:
       if: steps.changed_files.outputs.ascenda-loyalty == 'true'
       env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ascenda
-          IMAGE_TAG: loyalty-${{ github.sha }}
+          ECR_REPOSITORY: loyalty
+          IMAGE_TAG: ${{ github.sha }}
       run: |
         # Build a docker container and push it to ECR so that it can be deployed to ECS.
         # cd server/ascenda/loyalty
@@ -88,13 +88,12 @@ jobs:
         # docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         # docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         # echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
-
     - name: Build, tag, and push image to Amazon ECR [transaction]
       id: build-transaction-image
       if: steps.changed_files.outputs.ascenda-transaction == 'true'
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: ascenda
+        ECR_REPOSITORY: transaction
         IMAGE_TAG: ${{ github.sha }}
       run: |
         # Build a docker container and push it to ECR so that it can be deployed to ECS.
