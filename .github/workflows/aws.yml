@@ -104,23 +104,23 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
-    # - name: Download task definition [loyalty]
-    #   if: steps.changed_files.outputs.ascenda-loyalty == 'true'
-    #   run: |
-    #     aws ecs describe-task-definition --task-definition loyalty --query taskDefinition > task-definitions/loyalty-taskdef.json
+    - name: Download task definition [loyalty]
+      if: steps.changed_files.outputs.ascenda-loyalty == 'true'
+      run: |
+        aws ecs describe-task-definition --task-definition loyalty --query taskDefinition > task-definitions/loyalty-taskdef.json
     - name: Download task definition [transaction]
       if: steps.changed_files.outputs.ascenda-transaction == 'true'
       run: |
         aws ecs describe-task-definition --task-definition transaction --query taskDefinition > task-definitions/transaction-taskdef.json
 
-    # - name: Fill in the new image ID in the Amazon ECS task definition [loyalty]
-    #   id: loyalty-task-def
-    #   if: steps.changed_files.outputs.ascenda-loyalty == 'true'
-    #   uses: aws-actions/amazon-ecs-render-task-definition@v1
-    #   with:
-    #     task-definition: task-definitions/loyalty-taskdef.json
-    #     container-name: loyalty-container
-    #     image: ${{ steps.build-loyalty-image.outputs.image }}
+    - name: Fill in the new image ID in the Amazon ECS task definition [loyalty]
+      id: loyalty-task-def
+      if: steps.changed_files.outputs.ascenda-loyalty == 'true'
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definitions/loyalty-taskdef.json
+        container-name: loyalty-container
+        image: ${{ steps.build-loyalty-image.outputs.image }}
     - name: Fill in the new image ID in the Amazon ECS task definition [transaction]
       id: transaction-task-def
       if: steps.changed_files.outputs.ascenda-transaction == 'true'
@@ -130,15 +130,15 @@ jobs:
         container-name: transaction-container
         image: ${{ steps.build-transaction-image.outputs.image }}
 
-    # - name: Deploy Amazon ECS task definition [loyalty]
-    #   id: deploy-loyalty
-    #   if: steps.changed_files.outputs.ascenda-loyalty == 'true'
-    #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-    #   with:
-    #     task-definition: ${{ steps.loyalty-task-def.outputs.task-definition }}
-    #     service: loyalty-service
-    #     cluster: loyalty-cluster
-    #     wait-for-service-stability: true
+    - name: Deploy Amazon ECS task definition [loyalty]
+      id: deploy-loyalty
+      if: steps.changed_files.outputs.ascenda-loyalty == 'true'
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.loyalty-task-def.outputs.task-definition }}
+        service: loyalty-service
+        cluster: loyalty-cluster
+        wait-for-service-stability: true
     - name: Deploy Amazon ECS task definition [transaction]
       if: steps.changed_files.outputs.ascenda-transaction == 'true'
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
