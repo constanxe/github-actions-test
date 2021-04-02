@@ -119,7 +119,7 @@ jobs:
     #   if: steps.changed_files.outputs.ascenda-loyalty == 'true'
     #   uses: aws-actions/amazon-ecs-render-task-definition@v1
     #   with:
-    #     task-definition: loyalty-taskdef.json
+    #     task-definition: task-definitions/loyalty-taskdef.json
     #     container-name: loyalty-container
     #     image: ${{ steps.build-loyalty-image.outputs.image }}
     - name: Fill in the new image ID in the Amazon ECS task definition [transaction]
@@ -127,7 +127,7 @@ jobs:
       if: steps.changed_files.outputs.ascenda-transaction == 'true'
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: transaction-taskdef.json
+        task-definition: task-definitions/transaction-taskdef.json
         container-name: transaction-container
         image: ${{ steps.build-transaction-image.outputs.image }}
 
