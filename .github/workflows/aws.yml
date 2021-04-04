@@ -130,7 +130,7 @@ jobs:
     #     cluster: file-handling-cluster
     #     wait-for-service-stability: true
 
-
+ 
     # polling
     - name: Build, tag, and push image to Amazon ECR [polling]
       id: build-polling-image
