@@ -169,7 +169,7 @@
 									"    var Ajv = require('ajv');",
 									"    var ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}",
 									"    //Json schema to be validated",
-									"    var keys = [\"transaction_date\", \"additional_info\", \"amount\", \"bank_user_id\", \"loyalty_id\", \"member_id\", \"member_name_first\", \"member_name_last\", \"outcome_code\", \"partner_code\", \"reference_num\"]",
+									"    var keys = [\"loyalty_id\", \"loyalty_name\", \"loyalty_unit\", \"processing_time\", \"description\", \"enrollment_link\", \"terms_link\", \"validation\"]",
 									"    var schema = {",
 									"        \"type\": \"object\", ",
 									"        \"properties\" : {",
@@ -317,8 +317,7 @@
 		},
 		{
 			"key": "file_handling_url",
-			"value": "http://ascenda-load-balancer-1751800571.us-east-1.elb.amazonaws.com:5008",
-			"disabled": true
+			"value": "http://ascenda-load-balancer-1751800571.us-east-1.elb.amazonaws.com:5008"
 		},
 		{
 			"key": "exchange_url",
@@ -334,8 +333,7 @@
 		},
 		{
 			"key": "polling_url\n",
-			"value": "http://ascenda-load-balancer-1751800571.us-east-1.elb.amazonaws.com:5009",
-			"disabled": true
+			"value": "http://ascenda-load-balancer-1751800571.us-east-1.elb.amazonaws.com:5009"
 		}
 	]
 }
