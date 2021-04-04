@@ -33,10 +33,10 @@ name: Deploy to Amazon ECS
 
 jobs:
 
-  deploy:
-    name: Deploy
-  # initiate:
-  #   name: Initiate Workflow
+  # deploy:
+  #   name: Deploy
+  initiate:
+    name: Initiate Workflow
     runs-on: ubuntu-latest
     # outputs: 
     #   registry-output: ${{ steps.login-ecr.outputs.registry }}
@@ -75,24 +75,50 @@ jobs:
       id: login-ecr
       # if: steps.changed_files.outputs.aws == 'true'
       uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Create file and write the  output into it
       run: |
-        echo ${{ steps.login-ecr.outputs.registry }}
-  # deploy:
-  #   name: Deploy
-  #   needs: initiate
-  #   runs-on: ubuntu-latest
-    # steps:
-    # SERVICES
-    - name: Build, tag, and push image to Amazon ECR [loyalty]
-      id: build-loyalty-image
-      # if: steps.changed_files.outputs.ascenda-loyalty == 'true'
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: loyalty
-        IMAGE_TAG: ${{ github.sha }}
+        echo ${{ steps.login-ecr.outputs.registry }} > initiate_registry.txt
+
+    - name: Upload file as an artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: initiate_registry_output
+        path: initiate_registry.txt
+
+  deploy:
+    name: Deploy
+    needs: initiate
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Download artifact initiate_registry_output
+      uses: actions/download-artifact@v1
+      with:
+        name: initiate_registry_output
+
+    - name: Set the statuses as output parameters
+      id: set_outputs
       run: |
-        echo  ${{ steps.login-ecr.outputs.registry }}
-        echo ${{ github.sha }}
+        echo "::set-output name=initiate_registry::$(<initiate_registry_output/initiate_registry.txt)"
+
+    - name: Show the values of the outputs
+      run: |
+        # using the syntax steps.<step_id>.outputs.<output_name> to access the output parameters
+        echo "initiate_registry = ${{ steps.set_outputs.outputs.initiate_registry_output }}"
+
+
+    # # SERVICES
+    # - name: Build, tag, and push image to Amazon ECR [loyalty]
+    #   id: build-loyalty-image
+    #   # if: steps.changed_files.outputs.ascenda-loyalty == 'true'
+    #   env:
+    #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+    #     ECR_REPOSITORY: loyalty
+    #     IMAGE_TAG: ${{ github.sha }}
+    #   run: |
+    #     echo ${{ steps.login-ecr.outputs.registry }}
+    #     echo ${{ github.sha }}
     #     # Build a docker container and push it to ECR so that it can be deployed to ECS.
     #     cd server/ascenda/loyalty
     #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
