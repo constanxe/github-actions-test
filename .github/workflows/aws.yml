@@ -79,7 +79,7 @@ jobs:
       id: build-bank-image
       # if: steps.changed_files.outputs.ascenda-bank == 'true'
       env:
-          ECR_REGISTRY: ${{ needs.initiate.outputs.registry-output }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: bank
           IMAGE_TAG: ${{ github.sha }}
       run: |
@@ -110,18 +110,99 @@ jobs:
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.bank-task-def.outputs.task-definition }}
-        service: bank-service
+        service: bank
         cluster: bank-cluster
         wait-for-service-stability: true
 
-    # file handling
+
+    # # file handling
+    # - name: Build, tag, and push image to Amazon ECR [file_handling]
+    #   id: build-file_handling-image
+    #   # if: steps.changed_files.outputs.ascenda-file_handling == 'true'
+    #   env:
+    #       ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+    #       ECR_REPOSITORY: file_handling
+    #       IMAGE_TAG: ${{ github.sha }}
+    #   run: |
+    #     # Build a docker container and push it to ECR so that it can be deployed to ECS.
+    #     cd server/ascenda/file_handling
+    #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+    #     docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+
+    # - name: Download task definition [file_handling]
+    #   # if: steps.changed_files.outputs.ascenda-file_handling == 'true'
+    #   run: |
+    #     aws ecs describe-task-definition --task-definition file_handling --query taskDefinition > task-definitions/file_handling-taskdef.json
+
+    # - name: Fill in the new image ID in the Amazon ECS task definition [file_handling]
+    #   id: file_handling-task-def
+    #   # if: steps.changed_files.outputs.ascenda-file_handling == 'true'
+    #   uses: aws-actions/amazon-ecs-render-task-definition@v1
+    #   with:
+    #     task-definition: task-definitions/file_handling-taskdef.json
+    #     container-name: file_handling-container
+    #     image: ${{ steps.build-file_handling-image.outputs.image }}
+
+    # - name: Deploy Amazon ECS task definition [file_handling]
+    #   # if: steps.changed_files.outputs.ascenda-file_handling == 'true'
+    #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+    #   with:
+    #     task-definition: ${{ steps.file_handling-task-def.outputs.task-definition }}
+    #     service: file_handling
+    #     cluster: file-handling-cluster
+    #     wait-for-service-stability: true
+
+
+    # # polling
+    # - name: Build, tag, and push image to Amazon ECR [polling]
+    #   id: build-polling-image
+    #   # if: steps.changed_files.outputs.ascenda-polling == 'true'
+    #   env:
+    #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+    #     ECR_REPOSITORY: polling
+    #     IMAGE_TAG: ${{ github.sha }}
+    #   run: |
+    #     # Build a docker container and push it to ECR so that it can be deployed to ECS.
+    #     cd server/ascenda/polling
+    #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+    #     docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+
+    # - name: Download task definition [polling]
+    #   # if: steps.changed_files.outputs.ascenda-polling == 'true'
+    #   run: |
+    #     aws ecs describe-task-definition --task-definition polling --query taskDefinition > task-definitions/polling-taskdef.json
+
+    # - name: Fill in the new image ID in the Amazon ECS task definition [polling]
+    #   id: polling-task-def
+    #   # if: steps.changed_files.outputs.ascenda-polling == 'true'
+    #   uses: aws-actions/amazon-ecs-render-task-definition@v1
+    #   with:
+    #     task-definition: task-definitions/polling-taskdef.json
+    #     container-name: polling-container
+    #     image: ${{ steps.build-polling-image.outputs.image }}
+
+    # - name: Deploy Amazon ECS task definition [polling]
+    #   # if: steps.changed_files.outputs.ascenda-polling == 'true'
+    #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+    #   with:
+    #     task-definition: ${{ steps.polling-task-def.outputs.task-definition }}
+    #     service: polling-service
+    #     cluster: polling-cluster
+    #     wait-for-service-stability: true
+
 
     # # loyalty
     # - name: Build, tag, and push image to Amazon ECR [loyalty]
     #   id: build-loyalty-image
     #   # if: steps.changed_files.outputs.ascenda-loyalty == 'true'
     #   env:
-    #       ECR_REGISTRY: ${{ needs.initiate.outputs.registry-output }}
+    #       ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
     #       ECR_REPOSITORY: loyalty
     #       IMAGE_TAG: ${{ github.sha }}
     #   run: |
@@ -156,52 +237,13 @@ jobs:
     #     cluster: loyalty-cluster
     #     wait-for-service-stability: true
 
-    # polling
-    - name: Build, tag, and push image to Amazon ECR [polling]
-      id: build-polling-image
-      # if: steps.changed_files.outputs.ascenda-polling == 'true'
-      env:
-        ECR_REGISTRY: ${{ needs.initiate.outputs.registry-output }}
-        ECR_REPOSITORY: polling
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        # Build a docker container and push it to ECR so that it can be deployed to ECS.
-        cd server/ascenda/polling
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
-
-    - name: Download task definition [polling]
-      # if: steps.changed_files.outputs.ascenda-polling == 'true'
-      run: |
-        aws ecs describe-task-definition --task-definition polling --query taskDefinition > task-definitions/polling-taskdef.json
-
-    - name: Fill in the new image ID in the Amazon ECS task definition [polling]
-      id: polling-task-def
-      # if: steps.changed_files.outputs.ascenda-polling == 'true'
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: task-definitions/polling-taskdef.json
-        container-name: polling-container
-        image: ${{ steps.build-polling-image.outputs.image }}
-
-    - name: Deploy Amazon ECS task definition [polling]
-      # if: steps.changed_files.outputs.ascenda-polling == 'true'
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.polling-task-def.outputs.task-definition }}
-        service: polling-service
-        cluster: polling-cluster
-        wait-for-service-stability: true
 
     # # transaction
     # - name: Build, tag, and push image to Amazon ECR [transaction]
     #   id: build-transaction-image
     #   # if: steps.changed_files.outputs.ascenda-transaction == 'true'
     #   env:
-    #     ECR_REGISTRY: ${{ needs.initiate.outputs.registry-output }}
+    #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
     #     ECR_REPOSITORY: transaction
     #     IMAGE_TAG: ${{ github.sha }}
     #   run: |
