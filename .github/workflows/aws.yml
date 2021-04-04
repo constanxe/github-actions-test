@@ -294,11 +294,11 @@ jobs:
         wait-for-service-stability: true
 
 
-  test:
-    name: Test
-    needs: deploy
-    runs-on: ubuntu-latest
-    steps:
+  # test:
+  #   name: Test
+  #   needs: deploy
+  #   runs-on: ubuntu-latest
+  #   steps:
 
     - name: Run API Tests
       id: run-newman
