@@ -1,74 +1,341 @@
 {
 	"info": {
-		"_postman_id": "631c1b1f-092d-405a-8999-dcae47122539",
+		"_postman_id": "992844c9-2709-44b5-8a3c-d20742c9731a",
 		"name": "ITSA",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Test 1",
-			"event": [
+			"name": "Bank",
+			"item": [
 				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Response time is less than 1000ms\", function () {",
-							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
-							"});",
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"",
-							"pm.test(\"Response objects are valid\",function() {",
-							"    var Ajv = require('ajv');",
-							"    var ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}",
-							"    //Json schema to be validated",
-							"    var keys = [\"transaction_date\", \"additional_info\", \"amount\", \"bank_user_id\", \"loyalty_id\", \"member_id\", \"member_name_first\", \"member_name_last\", \"outcome_code\", \"partner_code\", \"reference_num\"]",
-							"    var schema = {",
-							"        \"type\": \"object\", ",
-							"        \"properties\" : {",
-							"            transaction: { ",
-							"                \"type\": \"array\", ",
-							"                \"items\": { \"type\" : \"object\", \"required\": keys  } ",
-							"            }",
-							"        }",
-							"    };",
-							"",
-							"    var jsonData = pm.response.json();",
-							"    var jsonValid = ajv.validate(schema, jsonData);",
-							"    if(!jsonValid){",
-							"        console.log(\"JSON Schema Validation Error: \" + JSON.stringify(ajv.errors));",
-							"    }",
-							"    pm.expect(jsonValid).to.be.true;",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://ascenda-lb-1398984097.us-east-1.elb.amazonaws.com:5004/ascenda/transaction",
-					"protocol": "http",
-					"host": [
-						"ascenda-lb-1398984097",
-						"us-east-1",
-						"elb",
-						"amazonaws",
-						"com"
+					"name": "Get Bank Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+									"});",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response objects are valid\",function() {",
+									"    var Ajv = require('ajv');",
+									"    var ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}",
+									"    //Json schema to be validated",
+									"    var keys = [\"bank_id\", \"bank_name\", \"bank_unit\"]",
+									"    var schema = {",
+									"        \"type\": \"object\", ",
+									"        \"properties\" : {",
+									"            bank: { ",
+									"                \"type\": \"array\", ",
+									"                \"minItems\": 0,",
+									"                \"items\": { \"type\" : \"object\", \"required\": keys  } ",
+									"            }",
+									"        }",
+									"    };",
+									"",
+									"    var jsonData = pm.response.json();",
+									"    var jsonValid = ajv.validate(schema, jsonData);",
+									"    if(!jsonValid){",
+									"        console.log(\"JSON Schema Validation Error: \" + JSON.stringify(ajv.errors));",
+									"    }",
+									"    pm.expect(jsonValid).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
 					],
-					"port": "5004",
-					"path": [
-						"ascenda",
-						"transaction"
-					]
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{bank_url}}/ascenda/bank",
+							"host": [
+								"{{bank_url}}"
+							],
+							"path": [
+								"ascenda",
+								"bank"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
+		},
+		{
+			"name": "Exchange Rate",
+			"item": [
+				{
+					"name": "Get Exchange Rate Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+									"});",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response objects are valid\",function() {",
+									"    var Ajv = require('ajv');",
+									"    var ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}",
+									"    //Json schema to be validated",
+									"    var keys = [\"bank_id\", \"loyalty_id\", \"base_exchange_amount\", \"loyalty_exchange_amount\"]",
+									"    var schema = {",
+									"        \"type\": \"object\", ",
+									"        \"properties\" : {",
+									"            exchange_rate: { ",
+									"                \"type\": \"array\", ",
+									"                \"minItems\": 0,",
+									"                \"items\": { \"type\" : \"object\", \"required\": keys  } ",
+									"            }",
+									"        }",
+									"    };",
+									"",
+									"    var jsonData = pm.response.json();",
+									"    var jsonValid = ajv.validate(schema, jsonData);",
+									"    if(!jsonValid){",
+									"        console.log(\"JSON Schema Validation Error: \" + JSON.stringify(ajv.errors));",
+									"    }",
+									"    pm.expect(jsonValid).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{exchange_url}}/ascenda/exchange_rate",
+							"host": [
+								"{{exchange_url}}"
+							],
+							"path": [
+								"ascenda",
+								"exchange_rate"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Loyalty",
+			"item": [
+				{
+					"name": "Get Loyalty Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+									"});",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response objects are valid\",function() {",
+									"    var Ajv = require('ajv');",
+									"    var ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}",
+									"    //Json schema to be validated",
+									"    var keys = [\"transaction_date\", \"additional_info\", \"amount\", \"bank_user_id\", \"loyalty_id\", \"member_id\", \"member_name_first\", \"member_name_last\", \"outcome_code\", \"partner_code\", \"reference_num\"]",
+									"    var schema = {",
+									"        \"type\": \"object\", ",
+									"        \"properties\" : {",
+									"            loyalty_programme: { ",
+									"                \"type\": \"array\", ",
+									"                \"minItems\": 0,",
+									"                \"items\": { \"type\" : \"object\", \"required\": keys  } ",
+									"            }",
+									"        }",
+									"    };",
+									"",
+									"    var jsonData = pm.response.json();",
+									"    var jsonValid = ajv.validate(schema, jsonData);",
+									"    if(!jsonValid){",
+									"        console.log(\"JSON Schema Validation Error: \" + JSON.stringify(ajv.errors));",
+									"    }",
+									"    pm.expect(jsonValid).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{loyalty_url}}/ascenda/loyalty",
+							"host": [
+								"{{loyalty_url}}"
+							],
+							"path": [
+								"ascenda",
+								"loyalty"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Transaction",
+			"item": [
+				{
+					"name": "Get Transaction Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+									"});",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response objects are valid\",function() {",
+									"    var Ajv = require('ajv');",
+									"    var ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}",
+									"    //Json schema to be validated",
+									"    var keys = [\"transaction_date\", \"additional_info\", \"amount\", \"bank_user_id\", \"loyalty_id\", \"member_id\", \"member_name_first\", \"member_name_last\", \"outcome_code\", \"partner_code\", \"reference_num\"]",
+									"    var schema = {",
+									"        \"type\": \"object\", ",
+									"        \"properties\" : {",
+									"            transaction: { ",
+									"                \"type\": \"array\", ",
+									"                \"minItems\": 0,",
+									"                \"items\": { \"type\" : \"object\", \"required\": keys  } ",
+									"            }",
+									"        }",
+									"    };",
+									"",
+									"    var jsonData = pm.response.json();",
+									"    var jsonValid = ajv.validate(schema, jsonData);",
+									"    if(!jsonValid){",
+									"        console.log(\"JSON Schema Validation Error: \" + JSON.stringify(ajv.errors));",
+									"    }",
+									"    pm.expect(jsonValid).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{transaction_url}}/ascenda/transaction",
+							"host": [
+								"{{transaction_url}}"
+							],
+							"path": [
+								"ascenda",
+								"transaction"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "bank_url",
+			"value": "http://ascenda-load-balancer-1751800571.us-east-1.elb.amazonaws.com:5001"
+		},
+		{
+			"key": "file_handling_url",
+			"value": "http://ascenda-load-balancer-1751800571.us-east-1.elb.amazonaws.com:5008",
+			"disabled": true
+		},
+		{
+			"key": "exchange_url",
+			"value": "http://ascenda-load-balancer-1751800571.us-east-1.elb.amazonaws.com:5003"
+		},
+		{
+			"key": "loyalty_url",
+			"value": "http://ascenda-lb-1398984097.us-east-1.elb.amazonaws.com:5006"
+		},
+		{
+			"key": "transaction_url",
+			"value": "http://ascenda-lb-1398984097.us-east-1.elb.amazonaws.com:5004"
+		},
+		{
+			"key": "polling_url\n",
+			"value": "http://ascenda-load-balancer-1751800571.us-east-1.elb.amazonaws.com:5009",
+			"disabled": true
 		}
 	]
 }
