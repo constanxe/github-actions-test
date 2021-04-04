@@ -75,7 +75,8 @@ jobs:
       id: login-ecr
       # if: steps.changed_files.outputs.aws == 'true'
       uses: aws-actions/amazon-ecr-login@v1
-
+      run: |
+        echo ${{ steps.login-ecr.outputs.registry }}
   # deploy:
   #   name: Deploy
   #   needs: initiate
@@ -86,7 +87,7 @@ jobs:
       id: build-loyalty-image
       # if: steps.changed_files.outputs.ascenda-loyalty == 'true'
       env:
-        ECR_REGISTRY:  ${{ steps.login-ecr.outputs.registry }}
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: loyalty
         IMAGE_TAG: ${{ github.sha }}
       run: |
