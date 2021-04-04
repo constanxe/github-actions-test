@@ -81,6 +81,7 @@ jobs:
   deploy:
     name: Deploy
     needs: initiate
+    runs-on: ubuntu-latest
     steps:
     # SERVICES
     - name: Build, tag, and push image to Amazon ECR [loyalty]
