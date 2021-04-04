@@ -59,12 +59,9 @@ def get_all_transaction():
 # get all partner code
 @app.route("/ascenda/transaction/partner")
 def get_all_partnercode():
-    try:
-        partnercodes = list(set([transaction for transaction in AscendaTransaction.query.filter_by(outcome_code=0).with_entities(AscendaTransaction.partner_code).all()]))
-        processed = tuple([item for t in partnercodes for item in t])
-        return jsonify(processed)
-    except:
-        return jsonify([])
+    partnercodes = list(set([transaction for transaction in AscendaTransaction.query.filter_by(outcome_code=0).with_entities(AscendaTransaction.partner_code).all()]))
+    processed = tuple([item for t in partnercodes for item in t])
+    return jsonify(processed)
 
 # get all transaction with PartnerCode
 @app.route("/ascenda/transaction/partner/<string:PartnerCode>")
@@ -99,7 +96,7 @@ def create_transaction():
         db.session.commit()
 
         try:
-            dynamo = requests.post('http://52.23.204.228:5009/polling/accrual', 
+            dynamo = requests.post('https://0c0q71flo8.execute-api.us-east-1.amazonaws.com/test/polling', 
                                 json = {
                                     "reference_num": reference_num,
                                     "loyalty_id": inputData["loyalty_id"],
@@ -127,7 +124,7 @@ def update_transaction_status(TransactionId):
         db.session.commit()
         
         try:
-            url_link = 'http://52.23.204.228:5009/polling/update/' + str(transaction.reference_num) + "/" + str(data["outcome_code"])
+            url_link = 'https://0c0q71flo8.execute-api.us-east-1.amazonaws.com/test/polling/' + str(transaction.reference_num) + "/" + str(data["outcome_code"])
             dynamo = requests.put(url_link)
         except Exception as e:
             return jsonify(str(e)), 500
