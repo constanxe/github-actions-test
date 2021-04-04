@@ -59,11 +59,12 @@ def get_all_transaction():
 # get all partner code
 @app.route("/ascenda/transaction/partner")
 def get_all_partnercode():
-    partnercodes = list(set([transaction for transaction in AscendaTransaction.query.filter_by(outcome_code=0).with_entities(AscendaTransaction.partner_code).all()]))
-    if partnercodes:
+    try:
+        partnercodes = list(set([transaction for transaction in AscendaTransaction.query.filter_by(outcome_code=0).with_entities(AscendaTransaction.partner_code).all()]))
         processed = tuple([item for t in partnercodes for item in t])
         return jsonify(processed)
-    return jsonify([])
+    except:
+        return jsonify([])
 
 # get all transaction with PartnerCode
 @app.route("/ascenda/transaction/partner/<string:PartnerCode>")

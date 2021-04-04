@@ -151,7 +151,7 @@ jobs:
     - name: Download task definition [polling]
       # if: steps.changed_files.outputs.ascenda-polling == 'true'
       run: |
-        aws ecs describe-task-definition --task-definition polling --query taskDefinition > task-definitions/polling-taskdef.json
+        aws ecs describe-task-definition --task-definition polling-task --query taskDefinition > task-definitions/polling-taskdef.json
 
     - name: Fill in the new image ID in the Amazon ECS task definition [polling]
       id: polling-task-def
