@@ -131,45 +131,45 @@ jobs:
     #     wait-for-service-stability: true
 
 
-    # # polling
-    # - name: Build, tag, and push image to Amazon ECR [polling]
-    #   id: build-polling-image
-    #   # if: steps.changed_files.outputs.ascenda-polling == 'true'
-    #   env:
-    #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-    #     ECR_REPOSITORY: polling
-    #     IMAGE_TAG: ${{ github.sha }}
-    #   run: |
-    #     # Build a docker container and push it to ECR so that it can be deployed to ECS.
-    #     cd server/ascenda/polling
-    #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-    #     docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-    #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+    # polling
+    - name: Build, tag, and push image to Amazon ECR [polling]
+      id: build-polling-image
+      # if: steps.changed_files.outputs.ascenda-polling == 'true'
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: polling
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        # Build a docker container and push it to ECR so that it can be deployed to ECS.
+        cd server/ascenda/polling
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
-    # - name: Download task definition [polling]
-    #   # if: steps.changed_files.outputs.ascenda-polling == 'true'
-    #   run: |
-    #     aws ecs describe-task-definition --task-definition polling --query taskDefinition > task-definitions/polling-taskdef.json
+    - name: Download task definition [polling]
+      # if: steps.changed_files.outputs.ascenda-polling == 'true'
+      run: |
+        aws ecs describe-task-definition --task-definition polling --query taskDefinition > task-definitions/polling-taskdef.json
 
-    # - name: Fill in the new image ID in the Amazon ECS task definition [polling]
-    #   id: polling-task-def
-    #   # if: steps.changed_files.outputs.ascenda-polling == 'true'
-    #   uses: aws-actions/amazon-ecs-render-task-definition@v1
-    #   with:
-    #     task-definition: task-definitions/polling-taskdef.json
-    #     container-name: polling-container
-    #     image: ${{ steps.build-polling-image.outputs.image }}
+    - name: Fill in the new image ID in the Amazon ECS task definition [polling]
+      id: polling-task-def
+      # if: steps.changed_files.outputs.ascenda-polling == 'true'
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definitions/polling-taskdef.json
+        container-name: polling-container
+        image: ${{ steps.build-polling-image.outputs.image }}
 
-    # - name: Deploy Amazon ECS task definition [polling]
-    #   # if: steps.changed_files.outputs.ascenda-polling == 'true'
-    #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-    #   with:
-    #     task-definition: ${{ steps.polling-task-def.outputs.task-definition }}
-    #     service: polling-service
-    #     cluster: polling-cluster
-    #     wait-for-service-stability: true
+    - name: Deploy Amazon ECS task definition [polling]
+      # if: steps.changed_files.outputs.ascenda-polling == 'true'
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.polling-task-def.outputs.task-definition }}
+        service: polling-service
+        cluster: polling-cluster
+        wait-for-service-stability: true
 
 
     # OK
