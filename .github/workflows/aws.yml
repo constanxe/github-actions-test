@@ -33,8 +33,24 @@ name: Deploy to Amazon ECS
 
 jobs:
 
+  pre_job:
+    # continue-on-error: true # Uncomment once integration is finished
+    runs-on: ubuntu-latest
+    # Map a step output to a job output
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          paths_ignore: '["**/README.md"]'
+          do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
+
+
   deploy:
     name: Deploy
+    needs: pre_job
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     steps:
 
@@ -74,46 +90,6 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v1
 
     # SERVICES
-    # bank
-    - name: Build, tag, and push image to Amazon ECR [bank]
-      id: build-bank-image
-      # if: steps.changed_files.outputs.ascenda-bank == 'true'
-      env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: bank
-          IMAGE_TAG: ${{ github.sha }}
-      run: |
-        # Build a docker container and push it to ECR so that it can be deployed to ECS.
-        cd server/ascenda/bank
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
-
-    - name: Download task definition [bank]
-      # if: steps.changed_files.outputs.ascenda-bank == 'true'
-      run: |
-        aws ecs describe-task-definition --task-definition bank --query taskDefinition > task-definitions/bank-taskdef.json
-
-    - name: Fill in the new image ID in the Amazon ECS task definition [bank]
-      id: bank-task-def
-      # if: steps.changed_files.outputs.ascenda-bank == 'true'
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: task-definitions/bank-taskdef.json
-        container-name: bank-container
-        image: ${{ steps.build-bank-image.outputs.image }}
-
-    - name: Deploy Amazon ECS task definition [bank]
-      # if: steps.changed_files.outputs.ascenda-bank == 'true'
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.bank-task-def.outputs.task-definition }}
-        service: bank
-        cluster: bank-cluster
-        wait-for-service-stability: true
-
 
     # # file handling
     # - name: Build, tag, and push image to Amazon ECR [file_handling]
@@ -194,6 +170,49 @@ jobs:
     #     task-definition: ${{ steps.polling-task-def.outputs.task-definition }}
     #     service: polling-service
     #     cluster: polling-cluster
+    #     wait-for-service-stability: true
+
+
+    # OK
+
+    # # bank
+    # - name: Build, tag, and push image to Amazon ECR [bank]
+    #   id: build-bank-image
+    #   # if: steps.changed_files.outputs.ascenda-bank == 'true'
+    #   env:
+    #       ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+    #       ECR_REPOSITORY: bank
+    #       IMAGE_TAG: ${{ github.sha }}
+    #   run: |
+    #     # Build a docker container and push it to ECR so that it can be deployed to ECS.
+    #     cd server/ascenda/bank
+    #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+    #     docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+
+    # - name: Download task definition [bank]
+    #   # if: steps.changed_files.outputs.ascenda-bank == 'true'
+    #   run: |
+    #     aws ecs describe-task-definition --task-definition bank --query taskDefinition > task-definitions/bank-taskdef.json
+
+    # - name: Fill in the new image ID in the Amazon ECS task definition [bank]
+    #   id: bank-task-def
+    #   # if: steps.changed_files.outputs.ascenda-bank == 'true'
+    #   uses: aws-actions/amazon-ecs-render-task-definition@v1
+    #   with:
+    #     task-definition: task-definitions/bank-taskdef.json
+    #     container-name: bank-container
+    #     image: ${{ steps.build-bank-image.outputs.image }}
+
+    # - name: Deploy Amazon ECS task definition [bank]
+    #   # if: steps.changed_files.outputs.ascenda-bank == 'true'
+    #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+    #   with:
+    #     task-definition: ${{ steps.bank-task-def.outputs.task-definition }}
+    #     service: bank
+    #     cluster: bank-cluster
     #     wait-for-service-stability: true
 
 
@@ -281,7 +300,7 @@ jobs:
 
   test:
     name: Test
-    needs: [deploy]
+    needs: deploy
     runs-on: ubuntu-latest
     steps:
 
