@@ -34,6 +34,7 @@ name: Deploy to Amazon ECS
 jobs:
 
   pre_job:
+    name: Check if duplicate workflows ran
     # continue-on-error: true # Uncomment once integration is finished
     runs-on: ubuntu-latest
     # Map a step output to a job output
