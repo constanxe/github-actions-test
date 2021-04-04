@@ -69,8 +69,12 @@ jobs:
             - 'server/ascenda/bank/**'
           ascenda-exchange:
             - 'server/ascenda/exchange_rate/**'
+          ascenda-file_handling:
+            - 'server/ascenda/file_handling/**'
           ascenda-loyalty:
             - 'server/ascenda/loyalty/**'
+          ascenda-polling:
+            - 'server/ascenda/polling/**'
           ascenda-transaction:
             - 'server/ascenda/transaction/**'
 
@@ -297,7 +301,7 @@ jobs:
   test:
     name: Test
     if: always()
-    needs: deploy
+    needs: [deploy]
     runs-on: ubuntu-latest
     steps:
 
