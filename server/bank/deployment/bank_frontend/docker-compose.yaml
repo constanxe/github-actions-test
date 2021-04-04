@@ -5,7 +5,11 @@ services:
       context: ./
       dockerfile: Dockerfile
     ports:
-      - "80:5000"
+      - "80:80"
+      # - "5000:5000"
+    network_mode: host
     environment: 
-      - proxyUrl=http://100.26.59.107
-      - ascendaUrl=http://ascenda-lb-1398984097.us-east-1.elb.amazonaws.com
+      # USE PRIVATE IP NAT/PROXY INSTANCE, SEND REQUEST WITHIN VPC
+      - proxyUrl=http://10.0.7.252
+      # - proxyUrl=http://host.docker.internal
+      - ascendaUrl=http://ascenda-load-balancer-1751800571.us-east-1.elb.amazonaws.com

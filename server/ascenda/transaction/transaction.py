@@ -21,35 +21,33 @@ CORS(app)
 class AscendaTransaction(db.Model):
     __tablename__ = 'ascenda_transaction'
 
-    id = db.Column(db.String(120), primary_key=True)
+    reference_num = db.Column(db.String(120), primary_key=True)
     loyalty_id = db.Column(db.String(120), nullable=False)
     member_id = db.Column(db.String(120), nullable=False)
     member_name_first = db.Column(db.String(80), nullable=False)
     member_name_last = db.Column(db.String(80), nullable=False)
     transaction_date = db.Column(db.String(10), nullable=False)
     amount = db.Column(db.Integer, nullable=False)
-    reference_num = db.Column(db.String(120), nullable=False)
     partner_code = db.Column(db.String(120), nullable=False)
     bank_user_id = db.Column(db.String(120), nullable=False)
     additional_info = db.Column(db.String(1000), nullable=True)
     outcome_code = db.Column(db.Integer, nullable=True)
 
-    def __init__(self, loyalty_id, member_id, member_name_first, member_name_last, transaction_date, amount, reference_num, partner_code, bank_user_id, additional_info, outcome_code):
-        self.id = str(base64.b64encode(uuid.uuid1().bytes).decode('ascii')).split("/")[0]
+    def __init__(self, reference_num, loyalty_id, member_id, member_name_first, member_name_last, transaction_date, amount, partner_code, bank_user_id, additional_info, outcome_code):
+        self.reference_num = reference_num
         self.loyalty_id = loyalty_id
         self.member_id = member_id
         self.member_name_first = member_name_first
         self.member_name_last = member_name_last
         self.transaction_date = transaction_date
         self.amount = amount
-        self.reference_num = reference_num
         self.partner_code = partner_code
         self.bank_user_id = bank_user_id
         self.additional_info = additional_info
         self.outcome_code = outcome_code
 
     def json(self):
-        return {"id": self.id, "loyalty_id": self.loyalty_id, "member_id": self.member_id, "member_name_first": self.member_name_first, "member_name_last": self.member_name_last, "transaction_date": self.transaction_date, "amount": self.amount, "reference_num": self.reference_num, "partner_code": self.partner_code, "bank_user_id": self.bank_user_id, "additional_info": self.additional_info, "outcome_code": self.outcome_code}
+        return {"reference_num": self.reference_num, "loyalty_id": self.loyalty_id, "member_id": self.member_id, "member_name_first": self.member_name_first, "member_name_last": self.member_name_last, "transaction_date": self.transaction_date, "amount": self.amount, "partner_code": self.partner_code, "bank_user_id": self.bank_user_id, "additional_info": self.additional_info, "outcome_code": self.outcome_code}
 
 
 # get all transaction
@@ -61,7 +59,7 @@ def get_all_transaction():
 # get all partner code
 @app.route("/ascenda/transaction/partner")
 def get_all_partnercode():
-    partnercodes = list(set([transaction for transaction in AscendaTransaction.query.with_entities(AscendaTransaction.partner_code).all()]))
+    partnercodes = list(set([transaction for transaction in AscendaTransaction.query.filter_by(outcome_code=0).with_entities(AscendaTransaction.partner_code).all()]))
     processed = tuple([item for t in partnercodes for item in t])
     return jsonify(processed)
 
@@ -78,10 +76,10 @@ def find_by_partnerCode(PartnerCode):
 # get transaction details with ID
 @app.route("/ascenda/transaction/<string:TransactionId>")
 def find_by_transactionId(TransactionId):
-    transaction_info = AscendaTransaction.query.filter_by(id=TransactionId).all()
+    transaction_info = AscendaTransaction.query.filter_by(reference_num=TransactionId).all()
 
     if transaction_info:
-        return jsonify({"transaction": [transaction.json() for transaction in AscendaTransaction.query.filter_by(id=TransactionId)]})
+        return jsonify({"transaction": [transaction.json() for transaction in AscendaTransaction.query.filter_by(reference_num=TransactionId)]})
     return jsonify({"message": "Transaction not found."}), 404
 
 # create a new transaction with details passed in 
@@ -89,22 +87,57 @@ def find_by_transactionId(TransactionId):
 def create_transaction():
     # if (AscendaTransaction.query.filter_by(id=TransactionId).first()):
     #     return jsonify({"message": "The transaction already exists."}), 400
-
-    data = request.get_json()
-    transaction_info = AscendaTransaction(**data)
+    reference_num = str(base64.b64encode(uuid.uuid1().bytes).decode('ascii')).split("/")[0][:10].upper()
+    inputData = request.get_json()
+    transaction_info = AscendaTransaction(reference_num, **inputData)
    
     try:
         db.session.add(transaction_info)
         db.session.commit()
-    except:
-        return jsonify({"message": "An error occurred creating the transaction."}), 500
+
+        try:
+            dynamo = requests.post('http://52.23.204.228:5009/polling/accrual', 
+                                json = {
+                                    "reference_num": reference_num,
+                                    "loyalty_id": inputData["loyalty_id"],
+                                    "partner_code": inputData["partner_code"]
+                                })
+            
+        except Exception as e:
+            return jsonify({"message": "Unable to add to Dynamo"}), 500
+            
+    except Exception as e:
+        return jsonify({"message": "Failed to create transaction"}), 500
+        # return jsonify({"message": "An error occurred creating the transaction."}), 500
 
     return jsonify(transaction_info.json()), 201
 
+# update transaction status
+@app.route("/ascenda/transaction/update_status/<string:TransactionId>", methods=['POST'])
+def update_transaction_status(TransactionId):
+    transaction = AscendaTransaction.query.filter_by(reference_num=TransactionId).first()
+    data = request.get_json()
+    
+    transaction.outcome_code=data["outcome_code"]
+    
+    try:
+        db.session.commit()
+        
+        try:
+            url_link = 'http://52.23.204.228:5009/polling/update/' + str(transaction.reference_num) + "/" + str(data["outcome_code"])
+            dynamo = requests.put(url_link)
+        except Exception as e:
+            return jsonify(str(e)), 500
+        
+    except:
+        return jsonify({"message": "An error occurred updating the transaction status."}),500
+
+    return jsonify(transaction.json()),201
+    
 # update transaction with transaction ID
 @app.route("/ascenda/transaction/update/<string:TransactionId>/", methods=['POST'])
 def update_transaction(TransactionId):
-    transaction_info = AscendaTransaction.query.filter_by(id=TransactionId).first()
+    transaction_info = AscendaTransaction.query.filter_by(reference_num=TransactionId).first()
     data = request.get_json()
 
     if "loyalty_id" in data:
@@ -119,8 +152,6 @@ def update_transaction(TransactionId):
         transaction_info.transaction_date = data["transaction_date"]
     if "amount" in data:
         transaction_info.amount = data["amount"]
-    if "reference_num" in data:
-        transaction_info.reference_num = data["reference_num"]
     if "partner_code" in data:
         transaction_info.partner_code = data["partner_code"]
     if "bank_user_id" in data:

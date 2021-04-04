@@ -1,3 +1,3 @@
-nohup java ProxyServer 10.0.164.136 5002 5002 & \
-nohup java ProxyServer 10.0.164.136 5005 5005 & \
-nohup java ProxyServer 10.0.164.136 5008 5008 &
+java ProxyServer ${PRIVATE_IP} 5002 5002 & \
+java ProxyServer ${PRIVATE_IP} 5005 5005 & \
+java ProxyServer ${PRIVATE_IP} 5008 5008 &

@@ -36,27 +36,29 @@
             $(async() => {
                 const username = document.getElementById("inputUsername").value;
                 const password = document.getElementById("inputPassword").value;
+                var csrf_token = "{{ csrf_token() }}";
 
                 const fetchBody = JSON.stringify({
-                    "username": username,
-                    "password": password
+                    "action":"login",
+                    "payload": {
+                        "username": username,
+                        "password": password
+                    }
                 })
 
-                const response = await fetch('{{data["proxyUrl"]}}:5002/bank/login', {
+                const response = await fetch('redirect', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        "X-CSRF-Token": csrf_token
                     },
                     body: fetchBody,
                 })
 
                 const data = await response.json()
-                console.log(data)
 
                 if (response.status == 200) {
-                    sessionStorage.setItem('userId', JSON.stringify(data.userId));
-
-                    setCookie('userId', JSON.stringify(data.userId), 5);
+                    sessionStorage.setItem('userId', data.userId);
                     window.location.replace("/");
                 } else {
                     showError();

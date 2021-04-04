@@ -50,10 +50,21 @@
         const pollResults = async () => {
             try {
                 $("#tableBody").empty()
-                const response = await fetch('{{data["proxyUrl"]}}:5005/bank/transaction')
-                const data = await response.json()
+
+                const bankResponse = await fetch('redirect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "X-CSRF-Token": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify({
+                        "action" : "fetchAllTransaction",
+                    }),
+                })
+
+                const bankData = await bankResponse.json()
                 
-                const transactions = data.transaction
+                const transactions = bankData.transaction
 
                 const outcome_codes = JSON.parse('{{data["outcome_codes"]|tojson|safe}}')
                 console.log(transactions[0]);

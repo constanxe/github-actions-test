@@ -19,16 +19,34 @@
         <p class="lead" id="amount"></p>
     </div>
 
-    {% include './global/scripts.html' %} {% include './global/footer.html' %}
+    {% include './global/scripts.html' %} 
+    {% include './global/footer.html' %}
 
     <script>
         $(async() => {
             try {
-                const response = await fetch(`{{data["proxyUrl"]}}:5002/bank/user/${sessionStorage.getItem('userId').slice(1,-1)}`)
+                var csrf_token = "{{ csrf_token() }}";
+
+                const fetchBody = JSON.stringify({
+                    "action":"fetchCurrentUser",
+                    "payload": {"userId" : sessionStorage.getItem("userId")}
+                })
+
+                const response = await fetch('redirect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "X-CSRF-Token": csrf_token
+                    },
+                    body: fetchBody,
+                })
+
                 const data = await response.json()
 
-                document.getElementById("name").innerText = "Hi, " + data.user[0].username
-                document.getElementById("amount").innerText = "Current available miles: " + data.user[0].points
+                if (response.status == 200){
+                    document.getElementById("name").innerText = "Hi, " + data.user[0].username
+                    document.getElementById("amount").innerText = "Current available miles: " + data.user[0].points
+                }
 
 
             } catch (e) {

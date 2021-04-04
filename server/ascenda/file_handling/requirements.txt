@@ -3,7 +3,7 @@ Flask-Cors==3.0.8
 Flask-SQLAlchemy==2.4.1
 mysql-connector-python==8.0.19
 SQLAlchemy<1.4
-requests==2.23.0
-Werkzeug
-flask-jwt-extended
-flask-jwt-extended[asymmetric_crypto]
+APScheduler==3.7.0
+boto==2.49.0
+requests==2.7.0
+boto3==1.17.28

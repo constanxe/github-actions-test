@@ -8,7 +8,8 @@ services:
       - "5008:5008"
     environment: 
       - dbURL=mysql+mysqlconnector://admin:itsaadmin@bank.c8lpmru5pno3.us-east-1.rds.amazonaws.com:3306/cs301_team1_bank
-      - ascendaUrl=http://ascenda-lb-1398984097.us-east-1.elb.amazonaws.com
+      # - dbURL=mysql+mysqlconnector://root:root@host.docker.internal:3306/cs301_team1_bank
+      - ascendaUrl=http://ascenda-load-balancer-1751800571.us-east-1.elb.amazonaws.com
   
   bank_transaction:
     build:
@@ -18,7 +19,8 @@ services:
       - "5005:5005"
     environment: 
       - dbURL=mysql+mysqlconnector://admin:itsaadmin@bank.c8lpmru5pno3.us-east-1.rds.amazonaws.com:3306/cs301_team1_bank
-      - ascendaUrl=http://ascenda-lb-1398984097.us-east-1.elb.amazonaws.com
+      # - dbURL=mysql+mysqlconnector://root:root@host.docker.internal:3306/cs301_team1_bank
+      - ascendaUrl=http://ascenda-load-balancer-1751800571.us-east-1.elb.amazonaws.com
   
   bank_user:
     build:
@@ -28,4 +30,5 @@ services:
       - "5002:5002"
     environment: 
       - dbURL=mysql+mysqlconnector://admin:itsaadmin@bank.c8lpmru5pno3.us-east-1.rds.amazonaws.com:3306/cs301_team1_bank
-      - ascendaUrl=http://ascenda-lb-1398984097.us-east-1.elb.amazonaws.com
+      # - dbURL=mysql+mysqlconnector://root:root@host.docker.internal:3306/cs301_team1_bank
+      - ascendaUrl=http://ascenda-load-balancer-1751800571.us-east-1.elb.amazonaws.com

@@ -12,7 +12,7 @@ public class ProxyServer {
 
     ConnectionManager connectionManager; // The ConnectionManager object
     ThreadGroup threadGroup;             // The threadgroup for all our threads
-    int maxConnections = 100;             // Maximum number of connections allowed
+    int maxConnections = 10;             // Maximum number of connections allowed
     String host;                         // host of this proxy server
     int remoteport;                      // remoteport of the actual backend server
 

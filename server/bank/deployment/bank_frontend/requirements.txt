@@ -4,3 +4,4 @@ Flask-SQLAlchemy==2.4.1
 mysql-connector-python==8.0.19
 SQLAlchemy<1.4
 requests==2.23.0
+Flask-WTF

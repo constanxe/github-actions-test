@@ -14,7 +14,7 @@
 
     {% include './global/header.html' %}
 
-    <div class="container-fluid" style="max-width: 95%; margin: 10px auto;">
+    <div class="table-responsive container-fluid" style="max-width: 95%; margin: 10px auto;">
         <h3>Transaction Details</h3>
         <table class="table table-striped mt-10">
             <thead>
@@ -83,7 +83,19 @@
     <script>
         $(async() => {
             try {
-                const response = await fetch('{{data["proxyUrl"]}}:5005/bank/transaction/user/' + sessionStorage.getItem('userId').slice(1, -1))
+                const fetchBody = JSON.stringify({
+                    "action":"fetchCurrentUserTransactions",
+                    "payload": {"userId" : sessionStorage.getItem("userId")}
+                })
+                const response = await fetch('redirect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "X-CSRF-Token": "{{ csrf_token() }}"
+                    },
+                    body: fetchBody,
+                })
+                
                 const data = await response.json()
                 const transactions = data.transaction
 
@@ -110,11 +122,28 @@
             $(function() {
                 $('.deleteButton').click(function() {
                     $(async() => {
-                        const response = await fetch('{{data["proxyUrl"]}}:5005/bank/transaction/' + $(this).attr('id'))
+                        const fetchBody = {
+                            "refNum": $(this).attr('id'),
+                        }
+
+                        const response = await fetch('redirect', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                "X-CSRF-Token": "{{ csrf_token() }}"
+                            },
+                            body: JSON.stringify({
+                                "action" : "fetchCurrentUserTransaction",
+                                "payload" : fetchBody
+                            }),
+                        })
+
                         const data = await response.json()
+
                         var trans = data.transaction[0]
 
-                        if (response.status == 200) {
+                        if (response.status == 200) 
+                        {
                             var status = trans.outcome_code == null ? "Pending" : trans.additional_info
 
                             $("#transId").text(trans.reference_num)
@@ -125,8 +154,9 @@
                             $("#status").text(status)
 
                             $('#deteleModal').modal('show');
-                        } else
+                        }else{
                             alert("Please try again later!")
+                        }
                     })
                 })
 
@@ -134,11 +164,41 @@
                     $(async() => {
                         $('#deteleModal').modal('hide');
 
-                        const bankResponse = await fetch('{{data["proxyUrl"]}}:5005/bank/transaction/delete/' + $("#transId").text())
+                        const bankFetchBody = {
+                            "refNum": $("#transId").text(),
+                        }
+
+                        const bankResponse = await fetch('redirect', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                "X-CSRF-Token": "{{ csrf_token() }}"
+                            },
+                            body: JSON.stringify({
+                                "action" : "deleteCurrentUserTransaction",
+                                "payload" : bankFetchBody
+                            }),
+                        })
+
                         const bankData = await bankResponse.json()
 
                         if (bankResponse.status == 201) {
-                            const ascendaResponse = await fetch('{{data["proxyUrl"]}}:5004/ascenda/transaction/delete/' + $("#transId").text())
+                            const ascendaFetchBody = {
+                                "refNum": $("#transId").text(),
+                            }
+
+                            const ascendaResponse = await fetch('redirect', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    "X-CSRF-Token": "{{ csrf_token() }}"
+                                },
+                                body: JSON.stringify({
+                                    "action" : "deleteAscendaTransaction",
+                                    "payload" : ascendaFetchBody
+                                }),
+                            })
+
                             const ascendaData = await ascendaResponse.json()
                             if (ascendaResponse.status == 201)
                                 $('#notiModal').modal('show');

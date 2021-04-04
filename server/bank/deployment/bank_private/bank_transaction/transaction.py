@@ -1,3 +1,7 @@
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
+
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -6,6 +10,8 @@ import uuid
 import requests, json
 import base64
 
+from flask_jwt_extended import jwt_required, JWTManager
+
 app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/cs301_team1_bank'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/cs301_team1_bank'
@@ -13,10 +19,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 # app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+mysqlconnector://admin:itsaadmin@bank.c8lpmru5pno3.us-east-1.rds.amazonaws.com:3306/cs301_team1_bank"
 
 ascendaUrl = environ.get('ascendaUrl')
-# ascendaUrl = "http://ascenda-lb-1398984097.us-east-1.elb.amazonaws.com"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["JWT_SECRET_KEY"] = "9da6905a-7dfe-4fd9-9c1a-63d2fe111c86"
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
  
 db = SQLAlchemy(app)
+jwt = JWTManager(app)
 CORS(app)
 
 class BankTransaction(db.Model):
@@ -31,8 +39,8 @@ class BankTransaction(db.Model):
     additional_info = db.Column(db.String(1000), nullable=True)
     outcome_code = db.Column(db.Integer, nullable=True)
  
-    def __init__(self, loyalty_id, user_id, member_id, transaction_date, amount, outcome_code, additional_info = None):
-        self.reference_num = str(base64.b64encode(uuid.uuid1().bytes).decode('ascii')).split("/")[0]
+    def __init__(self, reference_num, loyalty_id, user_id, member_id, transaction_date, amount, outcome_code, additional_info = None):
+        self.reference_num = reference_num
         self.loyalty_id = loyalty_id
         self.user_id = user_id
         self.member_id = member_id
@@ -46,6 +54,7 @@ class BankTransaction(db.Model):
 
 # get all 
 @app.route("/bank/transaction")
+@jwt_required(fresh=True)
 def get_all():
     # query for unfulfilled
     unfulfilled_transactions = BankTransaction.query.filter(BankTransaction.outcome_code.is_(None)).all()
@@ -74,6 +83,7 @@ def get_all():
     
 #get transaction details by user ID
 @app.route("/bank/transaction/user/<string:UserId>")
+@jwt_required(fresh=True)
 def find_by_userId(UserId):
     transaction_detail = BankTransaction.query.filter_by(user_id=UserId).all()
     if transaction_detail:
@@ -82,6 +92,7 @@ def find_by_userId(UserId):
 
 #get transaction details with transaction ID
 @app.route("/bank/transaction/<string:TransactionId>")
+@jwt_required(fresh=True)
 def find_by_transactionId(TransactionId):
     transaction_detail = BankTransaction.query.filter_by(reference_num=TransactionId).all()
     if transaction_detail:
@@ -89,6 +100,7 @@ def find_by_transactionId(TransactionId):
     return jsonify({"message": "Transaction not found."}), 404
   
 @app.route("/bank/transaction/", methods=['POST'])
+@jwt_required(fresh=True)
 def create_transaction():
     data = request.get_json()
     transaction_detail = BankTransaction(**data)
@@ -106,6 +118,7 @@ def create_transaction():
 
 # delete transaction record
 @app.route("/bank/transaction/delete/<string:transactionId>")
+@jwt_required(fresh=True)
 def delete_transaction(transactionId):
 
     transaction_detail = BankTransaction.query.filter_by(reference_num=transactionId).first()
@@ -120,6 +133,7 @@ def delete_transaction(transactionId):
     return jsonify(transaction_detail.json()), 201
 
 @app.route("/bank/transaction/update/<string:TransactionId>/", methods=['POST'])
+@jwt_required(fresh=True)
 def update_transaction(TransactionId):
     
     data = request.get_json()
@@ -130,7 +144,11 @@ def update_transaction(TransactionId):
         return jsonify(user_detail.json()),201
     return jsonify({"message": "An error occurred updating the transaction."}),500
 
-    
+
+@app.route("/bank/transaction/protected")
+@jwt_required(fresh=True)
+def protected():
+    return "success"
 
 def update_helper(TransactionId, data):
     user_detail = BankTransaction.query.filter_by(reference_num=TransactionId).first()

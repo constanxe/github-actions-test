@@ -4,8 +4,8 @@ from flask_cors import CORS
 import re
 
 app = Flask(__name__)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/cs301_team1_ascenda'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://admin:itsaadmin@ascenda-loyalty.cq4bzcmfnjpo.us-east-1.rds.amazonaws.com/cs301_team1_ascenda'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/cs301_team1_ascenda'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/cs301_team1_ascenda'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
  
 db = SQLAlchemy(app)
@@ -110,22 +110,9 @@ def membership_validation(LoyaltyId, MembershipID):
 
     return jsonify({"message": "Loyalty programme not found."}), 404
 
-# delete loyalty record
-@app.route("/ascenda/loyalty/delete/<string:LoyaltyId>")
-def delete_loyalty(LoyaltyId):
-    loyalty_detail = AscendaLoyalty.query.filter_by(loyalty_id=LoyaltyId).first()
-   
-    try:
-        db.session.delete(loyalty_detail)
-        db.session.commit()
-        
-    except:
-        return jsonify({"message": "An error occurred deleting the record."}),500
-
-    return jsonify(loyalty_detail.json()), 201
 
 if __name__ == '__main__': # if it is the main program you run, then start flask
     # with docker
     # app.run(host='0.0.0.0', port=5000, debug=True)
-    app.run(host='0.0.0.0', port=5006, debug=True) #to allow the file to be named other stuff apart from app.py
+    app.run(port=5006, debug=True) #to allow the file to be named other stuff apart from app.py
     # debug=True; shows the error and it will auto restart

@@ -16,19 +16,6 @@
 
     <div class="container-fluid">
         <div class="w-75 m-auto pt-3">
-            <h4> {{data['featured_programs']|length}} Featured Loyalty Programs </h4>
-            <ul class="list-group list-group-flush">
-                {% for item in data['featured_programs'] %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div class="text-bold">
-                        {{item["loyalty_name"]}}
-                    </div>
-                    <button class="btn btn-link transferMilesBtn" data-item='{{item|tojson|safe}}'>Transfer Miles</button>
-                </li>
-                {%endfor%}
-            </ul>
-        </div>
-        <div class="w-75 m-auto pt-3">
             <h4> {{data['programs']|length}} Available Loyalty Programs </h4>
             <ul class="list-group list-group-flush">
                 {% for item in data['programs'] %}
@@ -172,7 +159,8 @@
     </div>
 
 
-    {% include './global/footer.html' %} {% include './global/scripts.html' %}
+    {% include './global/footer.html' %} 
+    {% include './global/scripts.html' %}
 
     <script>
         $(function() {
@@ -238,134 +226,151 @@
 
                 formData = new FormData(e.target);
 
-                for (var key of formData.keys()) {
-                    console.log(`${key} : ${formData.get(key)}`);
-                }
-                e.preventDefault();
+                // for (var key of formData.keys()) {
+                //     console.log(`${key} : ${formData.get(key)}`);
+                // }
+                // e.preventDefault();
 
                 // Call API 
                 $(async() => {
-                    const transactionBody = JSON.stringify({
+
+                    // get bank details
+                    const bankId = "BANKABC"
+
+                    var balance = amountAvailable - parseInt(formData.get("inputTransferAmount"))
+
+                    // update user points balance
+                    const updateCurrentUserBody = JSON.stringify({
+                        "action":"updateCurrentUser",
+                        "payload": {"points": balance}
+                    })
+
+                    const updateCurrentUserResponse = await fetch('redirect', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            "X-CSRF-Token": "{{ csrf_token() }}"
+                        },
+                        body: updateCurrentUserBody,
+                    })
+
+                    $('#transferMilesModal').modal('hide');
+                    $('#resultModal').modal('show');
+
+                    // get user first name and last name
+                    const fetchCurrentUserBody = JSON.stringify({
+                        "action":"fetchCurrentUser",
+                        "payload": {"userId" : sessionStorage.getItem("userId")}
+                    })
+
+                    const fetchCurrentUserResponse = await fetch('redirect', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            "X-CSRF-Token": "{{ csrf_token() }}"
+                        },
+                        body: fetchCurrentUserBody,
+                    })
+
+                    const userData = await fetchCurrentUserResponse.json()
+
+                    // create ascenda transacion
+                    const ascTransaction = {
                         "loyalty_id": formData.get("inputProgramID"),
-                        "user_id": sessionStorage.getItem('userId').slice(1, -1),
+                        "member_id": formData.get("inputMemberID"),
+                        "member_name_first": userData["user"][0].firstname,
+                        "member_name_last": userData["user"][0].lastname,
+                        "transaction_date": new Date().toLocaleDateString(),
+                        "amount": parseInt(formData.get("inputTransferAmount")),
+                        "partner_code": bankId,
+                        "bank_user_id": sessionStorage.getItem('userId'),
+                        "additional_info": null,
+                        "outcome_code": null
+                    }
+
+                    const ascTransactionResponse = await fetch('redirect', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            "X-CSRF-Token": "{{ csrf_token() }}"
+                        },
+                        body: JSON.stringify({
+                            "action" : "createAscendaTransaction",
+                            "payload" : ascTransaction
+                        }),
+                    })
+
+                    const ascTransactionData = await ascTransactionResponse.json()
+
+                    // create bank transaction
+                    const transactionBody = JSON.stringify({
+                        "reference_num" : ascTransactionData["reference_num"],
+                        "loyalty_id": formData.get("inputProgramID"),
+                        "user_id": sessionStorage.getItem('userId'),
                         "member_id": formData.get("inputMemberID"),
                         "transaction_date": new Date().toLocaleDateString(),
                         "amount": parseInt(formData.get("inputTransferAmount")),
                         "additional_info": null,
                         "outcome_code": null
                     })
-
-                    // create bank transaction
-                    const transactionResponse = await fetch('{{data["proxyUrl"]}}:5005/bank/transaction/', {
+                    
+                    const transactionResponse = await fetch('redirect', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            "X-CSRF-Token": "{{ csrf_token() }}"
                         },
-                        body: transactionBody,
+                        body: JSON.stringify({
+                            "action" : "createBankTransaction",
+                            "payload" : transactionBody
+                        }),
                     })
 
                     const transactionData = await transactionResponse.json()
-
-                    
-
-                    if (transactionResponse.status == 201) {
-                        var balance = amountAvailable - parseInt(formData.get("inputTransferAmount"))
-
-                        // update user points balance
-                        const updateResponse = await fetch('{{data["proxyUrl"]}}:5002/bank/user/update/' + sessionStorage.getItem('userId').slice(1, -1), {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                "points": balance
-                            })
-                        })
-
-                        $('#transferMilesModal').modal('hide');
-                        $('#resultModal').modal('show');
-
-                        // get user first name and last name
-                        const userResponse = await fetch('{{data["proxyUrl"]}}:5002/bank/user/' + sessionStorage.getItem('userId').slice(1, -1))
-                        const userData = await userResponse.json()
-
-                        // get bank details
-                        const bankId = "BANKABC"
-
-                        const bankResponse = await fetch('{{data["ascendaUrl"]}}:5001/ascenda/bank/' + bankId)
-                        const bankData = await bankResponse.json()
-
-
-                        // create ascenda transacion
-                        const ascTransactionBody = JSON.stringify({
-                            "loyalty_id": formData.get("inputProgramID"),
-                            "member_id": formData.get("inputMemberID"),
-                            "member_name_first": userData["user"][0].firstname,
-                            "member_name_last": userData["user"][0].lastname,
-                            "transaction_date": new Date().toLocaleDateString(),
-                            "amount": parseInt(formData.get("inputTransferAmount")),
-                            "reference_num": transactionData.reference_num,
-                            "partner_code": bankData["bank"][0].bank_id,
-                            "bank_user_id": sessionStorage.getItem('userId').slice(1, -1),
-                            "additional_info": transactionData.additional_info,
-                            "outcome_code": transactionData.outcome_code
-                        })
-
-                        console.log(ascTransactionBody);
-
-                        const ascTransactionResponse = await fetch('{{data["ascendaUrl"]}}:5004/ascenda/transaction/create', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: ascTransactionBody,
-                        })
-
-                        const ascTransactionData = await ascTransactionResponse.json()
-
-                    }
 
                 })
 
             })
 
             $("#resultModal").on("hidden", function() {
-                console.log("close")
+                // console.log("close")
             });
 
             $("#attachMemberForm").submit((e) => {
 
                 formData = new FormData(e.target);
 
-                for (var key of formData.keys()) {
-                    console.log(`${key} : ${formData.get(key)}`);
-                }
+                // for (var key of formData.keys()) {
+                //     console.log(`${key} : ${formData.get(key)}`);
+                // }
                 e.preventDefault();
 
                 $(async()=>{
                     if (isValid && isCfmValid){
                         // create loyalty user
-                        const loyaltyUserBody = JSON.stringify({
-                            "user_id": sessionStorage.getItem('userId').slice(1, -1),
+                        const loyaltyUserBody = {
+                            "user_id": sessionStorage.getItem('userId'),
                             "loyalty_id": loyaltyId,
                             "member_id": formData.get("inputAttachMemberID"),
-                        })
-    
-                        const loyaltyUserResponse = await fetch('{{data["proxyUrl"]}}:5008/bank/loyalty/user/create', {
+                        }
+
+                        const loyaltyUserResponse = await fetch('redirect', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
+                                "X-CSRF-Token": "{{ csrf_token() }}"
                             },
-                            body: loyaltyUserBody,
+                            body: JSON.stringify({
+                                "action" : "createLoyaltyUser",
+                                "payload" : loyaltyUserBody
+                            }),
                         })
-    
+
                         const loyaltyUserData = await loyaltyUserResponse.json()
                     }else{
                         alert("Input Invalid")
                     }
                 })
-
-                
 
                 $('#attachMemberModal').modal('hide');
 
@@ -379,8 +384,26 @@
 
             $("#inputAttachMemberID").change((e) => {
                 $(async() => {
-                    console.log(loyaltyId)
-                    const response = await fetch('{{data["ascendaUrl"]}}:5006/ascenda/loyalty/membership/' + loyaltyId + "/" + e.target.value)
+                    // console.log(loyaltyId)
+
+                    const loyaltyUserData = {
+                        "user_id": sessionStorage.getItem('userId'),
+                        "loyalty_id": loyaltyId,
+                        "member_id": e.target.value,
+                    }
+
+                    const response = await fetch('redirect', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            "X-CSRF-Token": "{{ csrf_token() }}"
+                        },
+                        body: JSON.stringify({
+                            "action" : "validateMembershipFormat",
+                            "payload" : loyaltyUserData
+                        }),
+                    })
+
                     const data = await response.json()
                     isValid = true
 
@@ -393,7 +416,24 @@
 
             $("#inputConfirmMemberID").change((e) => {
                 $(async() => {
-                    const response = await fetch('{{data["ascendaUrl"]}}:5006/ascenda/loyalty/membership/' + loyaltyId + "/" + e.target.value)
+                    const loyaltyUserData = {
+                        "user_id": sessionStorage.getItem('userId'),
+                        "loyalty_id": loyaltyId,
+                        "member_id": e.target.value,
+                    }
+
+                    const response = await fetch('redirect', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            "X-CSRF-Token": "{{ csrf_token() }}"
+                        },
+                        body: JSON.stringify({
+                            "action" : "validateMembershipFormat",
+                            "payload" : loyaltyUserData
+                        }),
+                    })
+
                     const data = await response.json()
                     isCfmValid = true
 

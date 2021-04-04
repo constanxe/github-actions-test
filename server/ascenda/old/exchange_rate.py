@@ -5,7 +5,7 @@ from os import environ
 
 app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/cs301_team1_ascenda'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://admin:itsaadmin@ascenda-exchange-rate-db.cq4bzcmfnjpo.us-east-1.rds.amazonaws.com/cs301_team1_ascenda'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/cs301_team1_ascenda'
 # app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
  
@@ -93,5 +93,5 @@ def update_rate(BankId, PartnerId):
 if __name__ == '__main__': # if it is the main program you run, then start flask
     # with docker
     # app.run(host='0.0.0.0', port=5000, debug=True)
-    app.run(host='0.0.0.0', port=5003, debug=True) #to allow the file to be named other stuff apart from app.py
+    app.run(port=5003, debug=True) #to allow the file to be named other stuff apart from app.py
     # debug=True; shows the error and it will auto restart
