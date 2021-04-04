@@ -38,11 +38,7 @@ jobs:
   initiate:
     name: Initiate Workflow
     runs-on: ubuntu-latest
-    outputs: 
-      registry-output: ${{ steps.login-ecr.outputs.registry }}
-
     steps:
-
     - name: Checkout
       uses: actions/checkout@v2
 
@@ -78,6 +74,10 @@ jobs:
       # if: steps.changed_files.outputs.aws == 'true'
       uses: aws-actions/amazon-ecr-login@v1
 
+    outputs: 
+      registry-output: ${{ steps.login-ecr.outputs.registry }}
+
+
   deploy:
     name: Deploy
     needs: initiate
@@ -93,6 +93,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
       run: |
         echo ${{ needs.initiate.outputs.registry-output }}
+        echo ${{ github.sha }}
     #     # Build a docker container and push it to ECR so that it can be deployed to ECS.
     #     cd server/ascenda/loyalty
     #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
