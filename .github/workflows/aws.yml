@@ -254,7 +254,7 @@ jobs:
       with:
         task-definition: ${{ steps.file_handling-task-def.outputs.task-definition }}
         service: file_handling
-        cluster: file-handling-cluster
+        cluster: file_handling-cluster
         wait-for-service-stability: true
 
 
