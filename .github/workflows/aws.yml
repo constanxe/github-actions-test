@@ -99,7 +99,6 @@ jobs:
     # SERVICE
     - name: Build, tag, and push image to Amazon ECR [bank]
       id: build-bank-image
-      if: steps.changed_files.outputs.ascenda-bank == 'true'
       env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: bank
@@ -114,13 +113,11 @@ jobs:
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
     - name: Download task definition [bank]
-      if: steps.changed_files.outputs.ascenda-bank == 'true'
       run: |
         aws ecs describe-task-definition --task-definition bank --query taskDefinition > bank-taskdef.json
 
     - name: Fill in the new image ID in the Amazon ECS task definition [bank]
       id: bank-task-def
-      if: steps.changed_files.outputs.ascenda-bank == 'true'
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: bank-taskdef.json
@@ -128,7 +125,6 @@ jobs:
         image: ${{ steps.build-bank-image.outputs.image }}
 
     - name: Deploy Amazon ECS task definition [bank]
-      if: steps.changed_files.outputs.ascenda-bank == 'true'
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.bank-task-def.outputs.task-definition }}
@@ -162,7 +158,6 @@ jobs:
     # SERVICE
     - name: Build, tag, and push image to Amazon ECR [file_handling]
       id: build-file_handling-image
-      if: steps.changed_files.outputs.ascenda-file_handling == 'true'
       env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: file_handling
@@ -177,13 +172,11 @@ jobs:
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
     - name: Download task definition [file_handling]
-      if: steps.changed_files.outputs.ascenda-file_handling == 'true'
       run: |
         aws ecs describe-task-definition --task-definition file_handling --query taskDefinition > file_handling-taskdef.json
 
     - name: Fill in the new image ID in the Amazon ECS task definition [file_handling]
       id: file_handling-task-def
-      if: steps.changed_files.outputs.ascenda-file_handling == 'true'
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: file_handling-taskdef.json
@@ -191,7 +184,6 @@ jobs:
         image: ${{ steps.build-file_handling-image.outputs.image }}
 
     - name: Deploy Amazon ECS task definition [file_handling]
-      if: steps.changed_files.outputs.ascenda-file_handling == 'true'
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.file_handling-task-def.outputs.task-definition }}
@@ -225,7 +217,6 @@ jobs:
     # SERVICE
     - name: Build, tag, and push image to Amazon ECR [loyalty]
       id: build-loyalty-image
-      if: steps.changed_files.outputs.ascenda-loyalty == 'true'
       env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: loyalty
@@ -240,13 +231,11 @@ jobs:
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
     - name: Download task definition [loyalty]
-      if: steps.changed_files.outputs.ascenda-loyalty == 'true'
       run: |
         aws ecs describe-task-definition --task-definition loyalty --query taskDefinition > loyalty-taskdef.json
 
     - name: Fill in the new image ID in the Amazon ECS task definition [loyalty]
       id: loyalty-task-def
-      if: steps.changed_files.outputs.ascenda-loyalty == 'true'
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: loyalty-taskdef.json
@@ -254,7 +243,6 @@ jobs:
         image: ${{ steps.build-loyalty-image.outputs.image }}
 
     - name: Deploy Amazon ECS task definition [loyalty]
-      if: steps.changed_files.outputs.ascenda-loyalty == 'true'
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.loyalty-task-def.outputs.task-definition }}
@@ -288,7 +276,6 @@ jobs:
     # SERVICE
     - name: Build, tag, and push image to Amazon ECR [polling]
       id: build-polling-image
-      if: steps.changed_files.outputs.ascenda-polling == 'true'
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: polling
@@ -303,13 +290,11 @@ jobs:
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
     - name: Download task definition [polling]
-      if: steps.changed_files.outputs.ascenda-polling == 'true'
       run: |
         aws ecs describe-task-definition --task-definition polling-task --query taskDefinition > polling-taskdef.json
 
     - name: Fill in the new image ID in the Amazon ECS task definition [polling]
       id: polling-task-def
-      if: steps.changed_files.outputs.ascenda-polling == 'true'
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: polling-taskdef.json
@@ -317,7 +302,6 @@ jobs:
         image: ${{ steps.build-polling-image.outputs.image }}
 
     - name: Deploy Amazon ECS task definition [polling]
-      if: steps.changed_files.outputs.ascenda-polling == 'true'
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.polling-task-def.outputs.task-definition }}
@@ -351,7 +335,6 @@ jobs:
     # SERVICE
     - name: Build, tag, and push image to Amazon ECR [transaction]
       id: build-transaction-image
-      if: steps.changed_files.outputs.ascenda-transaction == 'true'
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: transaction
@@ -366,13 +349,11 @@ jobs:
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
     - name: Download task definition [transaction]
-      if: steps.changed_files.outputs.ascenda-transaction == 'true'
       run: |
         aws ecs describe-task-definition --task-definition transaction --query taskDefinition > transaction-taskdef.json
 
     - name: Fill in the new image ID in the Amazon ECS task definition [transaction]
       id: transaction-task-def
-      if: steps.changed_files.outputs.ascenda-transaction == 'true'
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: transaction-taskdef.json
@@ -380,7 +361,6 @@ jobs:
         image: ${{ steps.build-transaction-image.outputs.image }}
 
     - name: Deploy Amazon ECS task definition [transaction]
-      if: steps.changed_files.outputs.ascenda-transaction == 'true'
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.transaction-task-def.outputs.task-definition }}
