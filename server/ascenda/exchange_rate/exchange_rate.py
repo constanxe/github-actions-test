@@ -25,7 +25,6 @@ class AscendaExchangeRate(db.Model):
         self.loyalty_id = loyalty_id
         self.base_exchange_amount = base_exchange_amount
         self.loyalty_exchange_amount = loyalty_exchange_amount
-
  
     def json(self):
         return {"bank_id": self.bank_id, "loyalty_id": self.loyalty_id, "base_exchange_amount": self.base_exchange_amount, "loyalty_exchange_amount": self.loyalty_exchange_amount}

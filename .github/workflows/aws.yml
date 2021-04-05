@@ -172,6 +172,16 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
+    - name: Create cluster if do not exist [exchange_rate]
+      continue-on-error: true
+      run: |
+        aws ecs create-cluster --region us-east-1 --cluster-name exchange_rate-cluster
+
+    - name: Create services if do not exist [exchange_rate]
+      continue-on-error: true
+      run: |
+        aws ecs create-service --region us-east-1 --cluster exchange_rate-cluster --service-name exchange_rate-service --task-definition exchange_rate --desired-count 2 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[subnet-011126a15d4118ab2],securityGroups=[sg-04ceaf462b4dbd50c]}"
+
     - name: Download task definition [exchange_rate]
       run: |
         aws ecs describe-task-definition --task-definition exchange_rate --query taskDefinition > exchange_rate-taskdef.json
@@ -188,8 +198,8 @@ jobs:
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.exchange_rate-task-def.outputs.task-definition }}
-        service: exchange_rate
-        cluster: exchange-rate-cluster
+        service: exchange_rate-service
+        cluster: exchange_rate-cluster
         wait-for-service-stability: true
 
 
@@ -230,7 +240,6 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
-
 
     - name: Create cluster if do not exist [file_handling]
       continue-on-error: true

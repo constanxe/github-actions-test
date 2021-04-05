@@ -141,7 +141,7 @@ class AscendaTransaction(db.Model):
 
 @app.route("/ascenda/filehandle/health_check")
 def health_check():
-    return jsonify({"message": "Success"}), 201
+    return jsonify({"message": "Success"}), 200
 
 @app.route("/ascenda/filehandle/delete_loyalty/<string:LoyaltyId>")
 def delete_loyalty(LoyaltyId):

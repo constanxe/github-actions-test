@@ -90,8 +90,8 @@
 									"    pm.expect(pm.response.responseTime).to.be.below(1000);",
 									"});",
 									"",
-									"pm.test(\"Status code is 201\", function () {",
-									"    pm.response.to.have.status(201);",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
 									"});"
 								],
 								"type": "text/javascript"
