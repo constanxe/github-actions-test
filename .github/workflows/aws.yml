@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
   #     should_skip: ${{ steps.skip_check.outputs.should_skip }}
-      should_deploy-bank: ${{ steps.changed_files.outputs.bank == 'true' }}
+      should_deploy_bank: ${{ steps.changed_files.outputs.bank == 'true' }}
       should_deploy-file_handling: ${{ steps.changed_files.outputs.file_handling == 'true' }}
     steps:
 
@@ -75,10 +75,10 @@ jobs:
 
 
 
-  deploy:
-    name: Deploy
+  deploy-bank:
+    name: Deploy Bank Service
     needs: pre_job
-    # if: ${{ needs.pre_job.outputs.should_deploy-bank == 'true' }}
+    if: ${{ needs.pre_job.outputs.should_deploy_bank == 'true' }}
     # if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     steps:
@@ -106,8 +106,7 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
-    # SERVICES
-  #   # bank
+    # SERVICE
   #   - name: Build, tag, and push image to Amazon ECR [bank]
   #     id: build-bank-image
   #     if: steps.changed_files.outputs.ascenda-bank == 'true'
@@ -148,12 +147,9 @@ jobs:
   #       wait-for-service-stability: true
 
 
-
-  deploy2:
-    name: Deploy2
+  deploy-file_handling:
+    name: Deploy File Handling Service
     needs: pre_job
-    # if: ${{ needs.pre_job.outputs.should_deploy-file_handling == 'true' }}
-    # if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     steps:
 
@@ -180,9 +176,7 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
-    # SERVICES
-
-  #   # file handling
+    # SERVICE
   #   - name: Build, tag, and push image to Amazon ECR [file_handling]
   #     id: build-file_handling-image
   #     if: steps.changed_files.outputs.ascenda-file_handling == 'true'
@@ -479,7 +473,7 @@ jobs:
   test:
     name: Test
     if: always()
-    needs: [deploy, deploy2]
+    needs: [deploy-bank, deploy-file_handling]
     runs-on: ubuntu-latest
     steps:
 
