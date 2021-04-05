@@ -479,7 +479,7 @@ jobs:
 
   test:
     name: Test
-    if: always()
+    # if: always()
     needs: [deploy-bank, deploy-exchange_rate, deploy-file_handling, deploy-loyalty, deploy-polling, deploy-transaction]
     runs-on: ubuntu-latest
     steps:
