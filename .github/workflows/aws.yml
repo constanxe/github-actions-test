@@ -409,7 +409,7 @@ jobs:
   test:
     name: Test
     # if: always()
-    needs: [deploy-exchange_rate, deploy-file_handling, deploy-loyalty, deploy-polling, deploy-transaction]
+    needs: [deploy-file_handling, deploy-loyalty, deploy-polling, deploy-transaction]
     runs-on: ubuntu-latest
     steps:
 
