@@ -491,7 +491,7 @@ jobs:
       id: run-newman
       uses: anthonyvscode/newman-action@v1
       with:
-        collection: ITSA.postman_collection.json
+        collection: tests/ascenda.postman_collection.json
         reporters: cli
 
     - name: API Tests Output summary to console
