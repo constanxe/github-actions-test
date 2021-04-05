@@ -77,8 +77,7 @@ jobs:
   deploy-bank:
     name: Deploy Bank Service
     needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_deploy-bank == 'true' }}
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-bank == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
