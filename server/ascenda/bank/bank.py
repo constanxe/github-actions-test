@@ -23,7 +23,6 @@ class AscendaBank(db.Model):
         self.bank_name = bank_name
         self.bank_unit = bank_unit
 
- 
     def json(self):
         return {"bank_id": self.bank_id, "bank_name": self.bank_name, "bank_unit": self.bank_unit}
 

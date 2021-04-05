@@ -33,25 +33,20 @@ name: Deploy to Amazon ECS
 
 jobs:
 
-  # pre_job:
-  #   name: Initiation check
-  #   runs-on: ubuntu-latest
-  #   outputs:
+  pre_job:
+    name: Initiation check
+    runs-on: ubuntu-latest
+    outputs:
   #     should_skip: ${{ steps.skip_check.outputs.should_skip }}
-  #   steps:
+      should_deploy-bank: ${{ steps.changed_files.outputs.bank == 'true' }}
+      should_deploy-file_handling: ${{ steps.changed_files.outputs.file_handling == 'true' }}
+    steps:
+
   #     - id: skip_check
   #       uses: fkirc/skip-duplicate-actions@master
   #       with:
   #         paths_ignore: '["**/README.md"]'
   #         do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
-
-
-  deploy:
-    name: Deploy
-    # needs: pre_job
-    # if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
-    runs-on: ubuntu-latest
-    steps:
 
     - name: Checkout
       uses: actions/checkout@v2
@@ -61,14 +56,14 @@ jobs:
       uses: dorny/paths-filter@v2
       with:
         filters: |
-          aws:
-            - 'server/ascenda/**'
-          ascenda:
-            - 'server/ascenda/**'
+          # aws:
+          #   - 'server/ascenda/**'
+          #ascenda:
+          #  - 'server/ascenda/**'
           ascenda-bank:
             - 'server/ascenda/bank/**'
-          ascenda-exchange:
-            - 'server/ascenda/exchange_rate/**'
+          #ascenda-exchange:
+          #  - 'server/ascenda/exchange_rate/**'
           ascenda-file_handling:
             - 'server/ascenda/file_handling/**'
           ascenda-loyalty:
@@ -78,10 +73,30 @@ jobs:
           ascenda-transaction:
             - 'server/ascenda/transaction/**'
 
+
+
+  deploy:
+    name: Deploy
+    needs: pre_job
+    if: ${{ needs.pre_job.outputs.should_deploy-bank == 'true' }}
+    # if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # - name: Verify Changed files
+    #   id: changed_files
+    #   uses: dorny/paths-filter@v2
+    #   with:
+    #     filters: |
+    #       ascenda-bank:
+    #         - 'server/ascenda/bank/**'
+
     # AWS
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
-      if: steps.changed_files.outputs.aws == 'true'
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -89,219 +104,382 @@ jobs:
 
     - name: Login to Amazon ECR
       id: login-ecr
-      if: steps.changed_files.outputs.aws == 'true'
       uses: aws-actions/amazon-ecr-login@v1
 
     # SERVICES
-    # bank
-    - name: Build, tag, and push image to Amazon ECR [bank]
-      id: build-bank-image
-      if: steps.changed_files.outputs.ascenda-bank == 'true'
-      env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: bank
-          IMAGE_TAG: ${{ github.sha }}
-      run: |
-        # Build a docker container and push it to ECR so that it can be deployed to ECS.
-        cd server/ascenda/bank
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+  #   # bank
+  #   - name: Build, tag, and push image to Amazon ECR [bank]
+  #     id: build-bank-image
+  #     if: steps.changed_files.outputs.ascenda-bank == 'true'
+  #     env:
+  #         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+  #         ECR_REPOSITORY: bank
+  #         IMAGE_TAG: ${{ github.sha }}
+  #     run: |
+  #       # Build a docker container and push it to ECR so that it can be deployed to ECS.
+  #       cd server/ascenda/bank
+  #       docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+  #       docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+  #       docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+  #       docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+  #       echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
-    - name: Download task definition [bank]
-      if: steps.changed_files.outputs.ascenda-bank == 'true'
-      run: |
-        aws ecs describe-task-definition --task-definition bank --query taskDefinition > bank-taskdef.json
+  #   - name: Download task definition [bank]
+  #     if: steps.changed_files.outputs.ascenda-bank == 'true'
+  #     run: |
+  #       aws ecs describe-task-definition --task-definition bank --query taskDefinition > bank-taskdef.json
 
-    - name: Fill in the new image ID in the Amazon ECS task definition [bank]
-      id: bank-task-def
-      if: steps.changed_files.outputs.ascenda-bank == 'true'
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
+  #   - name: Fill in the new image ID in the Amazon ECS task definition [bank]
+  #     id: bank-task-def
+  #     if: steps.changed_files.outputs.ascenda-bank == 'true'
+  #     uses: aws-actions/amazon-ecs-render-task-definition@v1
+  #     with:
+  #       task-definition: bank-taskdef.json
+  #       container-name: bank-container
+  #       image: ${{ steps.build-bank-image.outputs.image }}
+
+  #   - name: Deploy Amazon ECS task definition [bank]
+  #     if: steps.changed_files.outputs.ascenda-bank == 'true'
+  #     uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+  #     with:
+  #       task-definition: ${{ steps.bank-task-def.outputs.task-definition }}
+  #       service: bank
+  #       cluster: bank-cluster
+  #       wait-for-service-stability: true
+
+
+
+  deploy2:
+    name: Deploy2
+    needs: pre_job
+    if: ${{ needs.pre_job.outputs.should_deploy-file_handling == 'true' }}
+    # if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # - name: Verify Changed files
+    #   id: changed_files
+    #   uses: dorny/paths-filter@v2
+    #   with:
+    #     filters: |
+    #       ascenda-file_handling:
+    #         - 'server/ascenda/file_handling/**'
+
+    # AWS
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
       with:
-        task-definition: bank-taskdef.json
-        container-name: bank-container
-        image: ${{ steps.build-bank-image.outputs.image }}
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
 
-    - name: Deploy Amazon ECS task definition [bank]
-      if: steps.changed_files.outputs.ascenda-bank == 'true'
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.bank-task-def.outputs.task-definition }}
-        service: bank
-        cluster: bank-cluster
-        wait-for-service-stability: true
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
 
+    # SERVICES
 
-    # file handling
-    - name: Build, tag, and push image to Amazon ECR [file_handling]
-      id: build-file_handling-image
-      if: steps.changed_files.outputs.ascenda-file_handling == 'true'
-      env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: file_handling
-          IMAGE_TAG: ${{ github.sha }}
-      run: |
-        # Build a docker container and push it to ECR so that it can be deployed to ECS.
-        cd server/ascenda/file_handling
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+  #   # file handling
+  #   - name: Build, tag, and push image to Amazon ECR [file_handling]
+  #     id: build-file_handling-image
+  #     if: steps.changed_files.outputs.ascenda-file_handling == 'true'
+  #     env:
+  #         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+  #         ECR_REPOSITORY: file_handling
+  #         IMAGE_TAG: ${{ github.sha }}
+  #     run: |
+  #       # Build a docker container and push it to ECR so that it can be deployed to ECS.
+  #       cd server/ascenda/file_handling
+  #       docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+  #       docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+  #       docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+  #       docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+  #       echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
-    - name: Download task definition [file_handling]
-      if: steps.changed_files.outputs.ascenda-file_handling == 'true'
-      run: |
-        aws ecs describe-task-definition --task-definition file_handling --query taskDefinition > file_handling-taskdef.json
+  #   - name: Download task definition [file_handling]
+  #     if: steps.changed_files.outputs.ascenda-file_handling == 'true'
+  #     run: |
+  #       aws ecs describe-task-definition --task-definition file_handling --query taskDefinition > file_handling-taskdef.json
 
-    - name: Fill in the new image ID in the Amazon ECS task definition [file_handling]
-      id: file_handling-task-def
-      if: steps.changed_files.outputs.ascenda-file_handling == 'true'
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: file_handling-taskdef.json
-        container-name: file_handling_container
-        image: ${{ steps.build-file_handling-image.outputs.image }}
+  #   - name: Fill in the new image ID in the Amazon ECS task definition [file_handling]
+  #     id: file_handling-task-def
+  #     if: steps.changed_files.outputs.ascenda-file_handling == 'true'
+  #     uses: aws-actions/amazon-ecs-render-task-definition@v1
+  #     with:
+  #       task-definition: file_handling-taskdef.json
+  #       container-name: file_handling_container
+  #       image: ${{ steps.build-file_handling-image.outputs.image }}
 
-    - name: Deploy Amazon ECS task definition [file_handling]
-      if: steps.changed_files.outputs.ascenda-file_handling == 'true'
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.file_handling-task-def.outputs.task-definition }}
-        service: file_handling
-        cluster: file-handling-cluster
-        wait-for-service-stability: true
+  #   - name: Deploy Amazon ECS task definition [file_handling]
+  #     if: steps.changed_files.outputs.ascenda-file_handling == 'true'
+  #     uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+  #     with:
+  #       task-definition: ${{ steps.file_handling-task-def.outputs.task-definition }}
+  #       service: file_handling
+  #       cluster: file-handling-cluster
+  #       wait-for-service-stability: true
 
 
-    # loyalty
-    - name: Build, tag, and push image to Amazon ECR [loyalty]
-      id: build-loyalty-image
-      if: steps.changed_files.outputs.ascenda-loyalty == 'true'
-      env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: loyalty
-          IMAGE_TAG: ${{ github.sha }}
-      run: |
-        # Build a docker container and push it to ECR so that it can be deployed to ECS.
-        cd server/ascenda/loyalty
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
-    - name: Download task definition [loyalty]
-      if: steps.changed_files.outputs.ascenda-loyalty == 'true'
-      run: |
-        aws ecs describe-task-definition --task-definition loyalty --query taskDefinition > loyalty-taskdef.json
+  # deploy:
+  #   name: Deploy
+  #   # needs: pre_job
+  #   # if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+  #   runs-on: ubuntu-latest
+  #   steps:
 
-    - name: Fill in the new image ID in the Amazon ECS task definition [loyalty]
-      id: loyalty-task-def
-      if: steps.changed_files.outputs.ascenda-loyalty == 'true'
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: loyalty-taskdef.json
-        container-name: loyalty-container
-        image: ${{ steps.build-loyalty-image.outputs.image }}
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
 
-    - name: Deploy Amazon ECS task definition [loyalty]
-      if: steps.changed_files.outputs.ascenda-loyalty == 'true'
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.loyalty-task-def.outputs.task-definition }}
-        service: loyalty-service
-        cluster: loyalty-cluster
-        wait-for-service-stability: true
+  #   - name: Verify Changed files
+  #     id: changed_files
+  #     uses: dorny/paths-filter@v2
+  #     with:
+  #       filters: |
+  #         aws:
+  #           - 'server/ascenda/**'
+  #         #ascenda:
+  #         #  - 'server/ascenda/**'
+  #         ascenda-bank:
+  #           - 'server/ascenda/bank/**'
+  #         #ascenda-exchange:
+  #         #  - 'server/ascenda/exchange_rate/**'
+  #         ascenda-file_handling:
+  #           - 'server/ascenda/file_handling/**'
+  #         ascenda-loyalty:
+  #           - 'server/ascenda/loyalty/**'
+  #         ascenda-polling:
+  #           - 'server/ascenda/polling/**'
+  #         ascenda-transaction:
+  #           - 'server/ascenda/transaction/**'
+
+  #   # AWS
+  #   - name: Configure AWS credentials
+  #     uses: aws-actions/configure-aws-credentials@v1
+  #     if: steps.changed_files.outputs.aws == 'true'
+  #     with:
+  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #       aws-region: us-east-1
+
+  #   - name: Login to Amazon ECR
+  #     id: login-ecr
+  #     if: steps.changed_files.outputs.aws == 'true'
+  #     uses: aws-actions/amazon-ecr-login@v1
+
+  #   # SERVICES
+  #   # bank
+  #   - name: Build, tag, and push image to Amazon ECR [bank]
+  #     id: build-bank-image
+  #     if: steps.changed_files.outputs.ascenda-bank == 'true'
+  #     env:
+  #         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+  #         ECR_REPOSITORY: bank
+  #         IMAGE_TAG: ${{ github.sha }}
+  #     run: |
+  #       # Build a docker container and push it to ECR so that it can be deployed to ECS.
+  #       cd server/ascenda/bank
+  #       docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+  #       docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+  #       docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+  #       docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+  #       echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+
+  #   - name: Download task definition [bank]
+  #     if: steps.changed_files.outputs.ascenda-bank == 'true'
+  #     run: |
+  #       aws ecs describe-task-definition --task-definition bank --query taskDefinition > bank-taskdef.json
+
+  #   - name: Fill in the new image ID in the Amazon ECS task definition [bank]
+  #     id: bank-task-def
+  #     if: steps.changed_files.outputs.ascenda-bank == 'true'
+  #     uses: aws-actions/amazon-ecs-render-task-definition@v1
+  #     with:
+  #       task-definition: bank-taskdef.json
+  #       container-name: bank-container
+  #       image: ${{ steps.build-bank-image.outputs.image }}
+
+  #   - name: Deploy Amazon ECS task definition [bank]
+  #     if: steps.changed_files.outputs.ascenda-bank == 'true'
+  #     uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+  #     with:
+  #       task-definition: ${{ steps.bank-task-def.outputs.task-definition }}
+  #       service: bank
+  #       cluster: bank-cluster
+  #       wait-for-service-stability: true
+
+
+  #   # file handling
+  #   - name: Build, tag, and push image to Amazon ECR [file_handling]
+  #     id: build-file_handling-image
+  #     if: steps.changed_files.outputs.ascenda-file_handling == 'true'
+  #     env:
+  #         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+  #         ECR_REPOSITORY: file_handling
+  #         IMAGE_TAG: ${{ github.sha }}
+  #     run: |
+  #       # Build a docker container and push it to ECR so that it can be deployed to ECS.
+  #       cd server/ascenda/file_handling
+  #       docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+  #       docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+  #       docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+  #       docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+  #       echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+
+  #   - name: Download task definition [file_handling]
+  #     if: steps.changed_files.outputs.ascenda-file_handling == 'true'
+  #     run: |
+  #       aws ecs describe-task-definition --task-definition file_handling --query taskDefinition > file_handling-taskdef.json
+
+  #   - name: Fill in the new image ID in the Amazon ECS task definition [file_handling]
+  #     id: file_handling-task-def
+  #     if: steps.changed_files.outputs.ascenda-file_handling == 'true'
+  #     uses: aws-actions/amazon-ecs-render-task-definition@v1
+  #     with:
+  #       task-definition: file_handling-taskdef.json
+  #       container-name: file_handling_container
+  #       image: ${{ steps.build-file_handling-image.outputs.image }}
+
+  #   - name: Deploy Amazon ECS task definition [file_handling]
+  #     if: steps.changed_files.outputs.ascenda-file_handling == 'true'
+  #     uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+  #     with:
+  #       task-definition: ${{ steps.file_handling-task-def.outputs.task-definition }}
+  #       service: file_handling
+  #       cluster: file-handling-cluster
+  #       wait-for-service-stability: true
+
+
+  #   # loyalty
+  #   - name: Build, tag, and push image to Amazon ECR [loyalty]
+  #     id: build-loyalty-image
+  #     if: steps.changed_files.outputs.ascenda-loyalty == 'true'
+  #     env:
+  #         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+  #         ECR_REPOSITORY: loyalty
+  #         IMAGE_TAG: ${{ github.sha }}
+  #     run: |
+  #       # Build a docker container and push it to ECR so that it can be deployed to ECS.
+  #       cd server/ascenda/loyalty
+  #       docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+  #       docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+  #       docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+  #       docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+  #       echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+
+  #   - name: Download task definition [loyalty]
+  #     if: steps.changed_files.outputs.ascenda-loyalty == 'true'
+  #     run: |
+  #       aws ecs describe-task-definition --task-definition loyalty --query taskDefinition > loyalty-taskdef.json
+
+  #   - name: Fill in the new image ID in the Amazon ECS task definition [loyalty]
+  #     id: loyalty-task-def
+  #     if: steps.changed_files.outputs.ascenda-loyalty == 'true'
+  #     uses: aws-actions/amazon-ecs-render-task-definition@v1
+  #     with:
+  #       task-definition: loyalty-taskdef.json
+  #       container-name: loyalty-container
+  #       image: ${{ steps.build-loyalty-image.outputs.image }}
+
+  #   - name: Deploy Amazon ECS task definition [loyalty]
+  #     if: steps.changed_files.outputs.ascenda-loyalty == 'true'
+  #     uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+  #     with:
+  #       task-definition: ${{ steps.loyalty-task-def.outputs.task-definition }}
+  #       service: loyalty-service
+  #       cluster: loyalty-cluster
+  #       wait-for-service-stability: true
 
     
-    # polling
-    - name: Build, tag, and push image to Amazon ECR [polling]
-      id: build-polling-image
-      if: steps.changed_files.outputs.ascenda-polling == 'true'
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: polling
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        # Build a docker container and push it to ECR so that it can be deployed to ECS.
-        cd server/ascenda/polling
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+  #   # polling
+  #   - name: Build, tag, and push image to Amazon ECR [polling]
+  #     id: build-polling-image
+  #     if: steps.changed_files.outputs.ascenda-polling == 'true'
+  #     env:
+  #       ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+  #       ECR_REPOSITORY: polling
+  #       IMAGE_TAG: ${{ github.sha }}
+  #     run: |
+  #       # Build a docker container and push it to ECR so that it can be deployed to ECS.
+  #       cd server/ascenda/polling
+  #       docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+  #       docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+  #       docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+  #       docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+  #       echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
-    - name: Download task definition [polling]
-      if: steps.changed_files.outputs.ascenda-polling == 'true'
-      run: |
-        aws ecs describe-task-definition --task-definition polling-task --query taskDefinition > polling-taskdef.json
+  #   - name: Download task definition [polling]
+  #     if: steps.changed_files.outputs.ascenda-polling == 'true'
+  #     run: |
+  #       aws ecs describe-task-definition --task-definition polling-task --query taskDefinition > polling-taskdef.json
 
-    - name: Fill in the new image ID in the Amazon ECS task definition [polling]
-      id: polling-task-def
-      if: steps.changed_files.outputs.ascenda-polling == 'true'
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: polling-taskdef.json
-        container-name: polling-container
-        image: ${{ steps.build-polling-image.outputs.image }}
+  #   - name: Fill in the new image ID in the Amazon ECS task definition [polling]
+  #     id: polling-task-def
+  #     if: steps.changed_files.outputs.ascenda-polling == 'true'
+  #     uses: aws-actions/amazon-ecs-render-task-definition@v1
+  #     with:
+  #       task-definition: polling-taskdef.json
+  #       container-name: polling-container
+  #       image: ${{ steps.build-polling-image.outputs.image }}
 
-    - name: Deploy Amazon ECS task definition [polling]
-      if: steps.changed_files.outputs.ascenda-polling == 'true'
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.polling-task-def.outputs.task-definition }}
-        service: polling-service
-        cluster: polling-cluster
-        wait-for-service-stability: true
+  #   - name: Deploy Amazon ECS task definition [polling]
+  #     if: steps.changed_files.outputs.ascenda-polling == 'true'
+  #     uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+  #     with:
+  #       task-definition: ${{ steps.polling-task-def.outputs.task-definition }}
+  #       service: polling-service
+  #       cluster: polling-cluster
+  #       wait-for-service-stability: true
 
 
-    # transaction
-    - name: Build, tag, and push image to Amazon ECR [transaction]
-      id: build-transaction-image
-      if: steps.changed_files.outputs.ascenda-transaction == 'true'
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: transaction
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        # Build a docker container and push it to ECR so that it can be deployed to ECS.
-        cd server/ascenda/transaction
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+  #   # transaction
+  #   - name: Build, tag, and push image to Amazon ECR [transaction]
+  #     id: build-transaction-image
+  #     if: steps.changed_files.outputs.ascenda-transaction == 'true'
+  #     env:
+  #       ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+  #       ECR_REPOSITORY: transaction
+  #       IMAGE_TAG: ${{ github.sha }}
+  #     run: |
+  #       # Build a docker container and push it to ECR so that it can be deployed to ECS.
+  #       cd server/ascenda/transaction
+  #       docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+  #       docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+  #       docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+  #       docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+  #       echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
-    - name: Download task definition [transaction]
-      if: steps.changed_files.outputs.ascenda-transaction == 'true'
-      run: |
-        aws ecs describe-task-definition --task-definition transaction --query taskDefinition > transaction-taskdef.json
+  #   - name: Download task definition [transaction]
+  #     if: steps.changed_files.outputs.ascenda-transaction == 'true'
+  #     run: |
+  #       aws ecs describe-task-definition --task-definition transaction --query taskDefinition > transaction-taskdef.json
 
-    - name: Fill in the new image ID in the Amazon ECS task definition [transaction]
-      id: transaction-task-def
-      if: steps.changed_files.outputs.ascenda-transaction == 'true'
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: transaction-taskdef.json
-        container-name: transaction-container
-        image: ${{ steps.build-transaction-image.outputs.image }}
+  #   - name: Fill in the new image ID in the Amazon ECS task definition [transaction]
+  #     id: transaction-task-def
+  #     if: steps.changed_files.outputs.ascenda-transaction == 'true'
+  #     uses: aws-actions/amazon-ecs-render-task-definition@v1
+  #     with:
+  #       task-definition: transaction-taskdef.json
+  #       container-name: transaction-container
+  #       image: ${{ steps.build-transaction-image.outputs.image }}
 
-    - name: Deploy Amazon ECS task definition [transaction]
-      if: steps.changed_files.outputs.ascenda-transaction == 'true'
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.transaction-task-def.outputs.task-definition }}
-        service: transaction-service
-        cluster: transaction-cluster
-        wait-for-service-stability: true
+  #   - name: Deploy Amazon ECS task definition [transaction]
+  #     if: steps.changed_files.outputs.ascenda-transaction == 'true'
+  #     uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+  #     with:
+  #       task-definition: ${{ steps.transaction-task-def.outputs.task-definition }}
+  #       service: transaction-service
+  #       cluster: transaction-cluster
+  #       wait-for-service-stability: true
 
 
   test:
     name: Test
     if: always()
-    needs: [deploy]
+    needs: [deploy, deploy2]
     runs-on: ubuntu-latest
     steps:
 
