@@ -140,7 +140,7 @@ jobs:
   deploy-file_handling:
     name: Deploy File Handling Service
     needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' }} #    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-bank == 'true' }}
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-file_handling == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
@@ -203,6 +203,7 @@ jobs:
   deploy-loyalty:
     name: Deploy Loyalty Service
     needs: pre_job
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-loyalty == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
@@ -265,6 +266,7 @@ jobs:
   deploy-polling:
     name: Deploy Polling Service
     needs: pre_job
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-polling == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
@@ -327,6 +329,7 @@ jobs:
   deploy-transaction:
     name: Deploy Transaction Service
     needs: pre_job
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-transaction == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
