@@ -49,7 +49,7 @@ jobs:
         with:
           paths_ignore: '["**/README.md"]'
           cancel_others: 'true'
-          # concurrent_skipping: 'always'
+          concurrent_skipping: 'always'
           # do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
 
     - name: Checkout
