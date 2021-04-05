@@ -36,7 +36,6 @@ class AscendaLoyalty(db.Model):
     def json(self):
         return {"loyalty_id": self.loyalty_id, "loyalty_name": self.loyalty_name, "loyalty_unit": self.loyalty_unit, "processing_time": self.processing_time, "description": self.description, "enrollment_link": self.enrollment_link, "terms_link": self.terms_link, "validation": self.validation}
 
-
 # get all loyalty
 @app.route("/ascenda/loyalty")
 def get_all_loyalty():
