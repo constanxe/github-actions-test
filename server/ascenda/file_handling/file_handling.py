@@ -283,7 +283,6 @@ def process_handback():
             return jsonify({"message": "An error occurred while processing the handback"}), 500
     return jsonify({"message": "Success"}), 201
 
-
 app.scheduler = BackgroundScheduler()
 app.scheduler.add_job(send_accrual, "cron", day_of_week='0-6', hour=20, minute=0)
 app.scheduler.add_job(process_handback, "cron", day_of_week='0-6', hour=20, minute=10)
