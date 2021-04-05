@@ -78,7 +78,7 @@ jobs:
   deploy:
     name: Deploy
     needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_deploy-bank == 'true' }}
+    # if: ${{ needs.pre_job.outputs.should_deploy-bank == 'true' }}
     # if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     steps:
@@ -86,13 +86,13 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    # - name: Verify Changed files
-    #   id: changed_files
-    #   uses: dorny/paths-filter@v2
-    #   with:
-    #     filters: |
-    #       ascenda-bank:
-    #         - 'server/ascenda/bank/**'
+    - name: Verify Changed files
+      id: changed_files
+      uses: dorny/paths-filter@v2
+      with:
+        filters: |
+          ascenda-bank:
+            - 'server/ascenda/bank/**'
 
     # AWS
     - name: Configure AWS credentials
@@ -152,7 +152,7 @@ jobs:
   deploy2:
     name: Deploy2
     needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_deploy-file_handling == 'true' }}
+    # if: ${{ needs.pre_job.outputs.should_deploy-file_handling == 'true' }}
     # if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     steps:
@@ -160,13 +160,13 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    # - name: Verify Changed files
-    #   id: changed_files
-    #   uses: dorny/paths-filter@v2
-    #   with:
-    #     filters: |
-    #       ascenda-file_handling:
-    #         - 'server/ascenda/file_handling/**'
+    - name: Verify Changed files
+      id: changed_files
+      uses: dorny/paths-filter@v2
+      with:
+        filters: |
+          ascenda-file_handling:
+            - 'server/ascenda/file_handling/**'
 
     # AWS
     - name: Configure AWS credentials
