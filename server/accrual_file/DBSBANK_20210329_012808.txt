@@ -1,2 +1,0 @@
-Index,Member ID,Member first name,Member last name,Transfer date,Amount,Reference number,Partner code
-1,2,firstname,lastname,2021-02-16,90,3,DBSBANK

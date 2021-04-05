@@ -37,7 +37,7 @@ name: Deploy to Amazon ECS
 jobs:
 
   pre_job:
-    name: Initiation check
+    name: Initiation Check
     runs-on: ubuntu-latest
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
@@ -63,6 +63,8 @@ jobs:
       uses: dorny/paths-filter@v2
       with:
         filters: |
+          # server:
+          #   - 'server/**'
           ascenda-file_handling:
             - 'server/ascenda/file_handling/**'
           ascenda-exchange_rate:
@@ -73,10 +75,14 @@ jobs:
             - 'server/ascenda/polling/**'
           ascenda-transaction:
             - 'server/ascenda/transaction/**'
+    
+      - name: flake8 Lint
+        uses: py-actions/flake8@v1
+        # if: ${{ steps.changed_files.outputs.server == 'true' }}
 
 
   deploy-file_handling:
-    name: Deploy File Handling Service in File Handling Cluster
+    name: Deploy FileHandling Service in FileHandling Cluster
     needs: pre_job
     if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-file_handling == 'true' }}
     runs-on: ubuntu-latest
@@ -145,7 +151,7 @@ jobs:
 
 
   deploy-exchange_rate:
-    name: Deploy Exchange Rate Service in Loyalty Cluser
+    name: Deploy ExchangeRate Service in Loyalty Cluser
     needs: pre_job
     if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-exchange_rate == 'true' }}
     runs-on: ubuntu-latest
@@ -182,7 +188,7 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
-    - name: Create LOYALTY cluster if do not exist [exchange_rate]
+    - name: Create cluster if do not exist [exchange_rate]
       continue-on-error: true
       run: |
         aws ecs create-cluster --region us-east-1 --cluster-name loyalty-cluster
