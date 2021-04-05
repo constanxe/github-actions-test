@@ -45,8 +45,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
-      should_deploy-exchange_rate: ${{ steps.changed_files.outputs.ascenda-exchange_rate == 'true' }}
       should_deploy-file_handling: ${{ steps.changed_files.outputs.ascenda-file_handling == 'true' }}
+      should_deploy-exchange_rate: ${{ steps.changed_files.outputs.ascenda-exchange_rate == 'true' }}
       should_deploy-loyalty: ${{ steps.changed_files.outputs.ascenda-loyalty == 'true' }}
       should_deploy-polling: ${{ steps.changed_files.outputs.ascenda-polling == 'true' }}
       should_deploy-transaction: ${{ steps.changed_files.outputs.ascenda-transaction == 'true' }}
@@ -67,8 +67,6 @@ jobs:
       uses: dorny/paths-filter@v2
       with:
         filters: |
-          ascenda-bank:
-            - 'server/ascenda/bank/**'
           ascenda-file_handling:
             - 'server/ascenda/file_handling/**'
           ascenda-exchange_rate:
