@@ -44,12 +44,13 @@ jobs:
       should_deploy-transaction: ${{ steps.changed_files.outputs.ascenda-transaction == 'true' }}
     steps:
 
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@master
-        with:
-          paths_ignore: '["**/README.md"]'
-          cancel_others: 'true'
-          concurrent_skipping: 'always'
+    - name: Skip Workflow Check
+      id: skip_check
+      uses: fkirc/skip-duplicate-actions@master
+      with:
+        paths_ignore: '["**/README.md"]'
+        cancel_others: 'true'
+        concurrent_skipping: 'always'
 
     - name: Checkout
       uses: actions/checkout@v2
@@ -77,7 +78,7 @@ jobs:
     name: Deploy Bank Service
     needs: pre_job
     if: ${{ needs.pre_job.outputs.should_deploy-bank == 'true' }}
-    # if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     steps:
 
