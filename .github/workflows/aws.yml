@@ -25,7 +25,6 @@
 
 on:
   push:
-    branches: [ main ]
     paths-ignore: 
       - '**/README.md'
       - '**/cloudformation/**'
@@ -33,6 +32,7 @@ on:
       - '**/server/bank/**'
       - '**/server/accrual_file/**'
       - '**/server/handback_file/**'
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -45,7 +45,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
-      should_deploy-bank: ${{ steps.changed_files.outputs.ascenda-bank == 'true' }}
       should_deploy-exchange_rate: ${{ steps.changed_files.outputs.ascenda-exchange_rate == 'true' }}
       should_deploy-file_handling: ${{ steps.changed_files.outputs.ascenda-file_handling == 'true' }}
       should_deploy-loyalty: ${{ steps.changed_files.outputs.ascenda-loyalty == 'true' }}
@@ -57,7 +56,6 @@ jobs:
       id: skip_check
       uses: fkirc/skip-duplicate-actions@master
       with:
-        # paths_ignore: '["**/README.md", "**/cloudformation/**", "**/sql/**", "**/server/bank/**", "**/server/accrual_file/**", "**/server/handback_file/**"]'
         cancel_others: 'true'
         concurrent_skipping: 'always'
 
@@ -83,142 +81,73 @@ jobs:
             - 'server/ascenda/transaction/**'
 
 
-  deploy-bank:
-    name: Deploy Bank Service
-    needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-bank == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
+  # deploy-exchange_rate:
+  #   name: Deploy Exchange Rate Service
+  #   needs: pre_job
+  #   if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-exchange_rate == 'true' }}
+  #   runs-on: ubuntu-latest
+  #   steps:
 
-    - name: Checkout
-      uses: actions/checkout@v2
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
 
-    # AWS
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
+  #   # AWS
+  #   - name: Configure AWS credentials
+  #     uses: aws-actions/configure-aws-credentials@v1
+  #     with:
+  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #       aws-region: us-east-1
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+  #   - name: Login to Amazon ECR
+  #     id: login-ecr
+  #     uses: aws-actions/amazon-ecr-login@v1
 
-    # SERVICE
-    - name: Build, tag, and push image to Amazon ECR [bank]
-      id: build-bank-image
-      env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: bank
-          IMAGE_TAG: ${{ github.sha }}
-      run: |
-        # Build a docker container and push it to ECR so that it can be deployed to ECS.
-        cd server/ascenda/bank
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+  #   # SERVICE
+  #   - name: Build, tag, and push image to Amazon ECR [exchange_rate]
+  #     id: build-exchange_rate-image
+  #     env:
+  #         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+  #         ECR_REPOSITORY: exchange_rate
+  #         IMAGE_TAG: ${{ github.sha }}
+  #     run: |
+  #       # Build a docker container and push it to ECR so that it can be deployed to ECS.
+  #       cd server/ascenda/exchange_rate
+  #       docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+  #       docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+  #       docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+  #       docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+  #       echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
-    - name: Create cluster if do not exist [bank]
-      continue-on-error: true
-      run: |
-        aws ecs create-cluster --region us-east-1 --cluster-name bank-cluster
+  #   - name: Create cluster if do not exist [exchange_rate]
+  #     continue-on-error: true
+  #     run: |
+  #       aws ecs create-cluster --region us-east-1 --cluster-name exchange_rate-cluster
 
-    - name: Create services if do not exist [bank]
-      continue-on-error: true
-      run: |
-        aws ecs create-service --region us-east-1 --cluster bank-cluster --service-name bank-service --task-definition bank --desired-count 2 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[subnet-011126a15d4118ab2],securityGroups=[sg-04ceaf462b4dbd50c]}"
+  #   - name: Create services if do not exist [exchange_rate]
+  #     continue-on-error: true
+  #     run: |
+  #       aws ecs create-service --region us-east-1 --cluster exchange_rate-cluster --service-name exchange_rate-service --task-definition exchange_rate --desired-count 2 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[subnet-011126a15d4118ab2],securityGroups=[sg-04ceaf462b4dbd50c]}"
 
-    - name: Download task definition [bank]
-      run: |
-        aws ecs describe-task-definition --task-definition bank --query taskDefinition > bank-taskdef.json
+  #   - name: Download task definition [exchange_rate]
+  #     run: |
+  #       aws ecs describe-task-definition --task-definition exchange_rate --query taskDefinition > exchange_rate-taskdef.json
 
-    - name: Fill in the new image ID in the Amazon ECS task definition [bank]
-      id: bank-task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: bank-taskdef.json
-        container-name: bank-container
-        image: ${{ steps.build-bank-image.outputs.image }}
+  #   - name: Fill in the new image ID in the Amazon ECS task definition [exchange_rate]
+  #     id: exchange_rate-task-def
+  #     uses: aws-actions/amazon-ecs-render-task-definition@v1
+  #     with:
+  #       task-definition: exchange_rate-taskdef.json
+  #       container-name: exchange_rate_container
+  #       image: ${{ steps.build-exchange_rate-image.outputs.image }}
 
-    - name: Deploy Amazon ECS task definition [bank]
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.bank-task-def.outputs.task-definition }}
-        service: bank
-        cluster: bank-cluster
-        wait-for-service-stability: true
-
-
-  deploy-exchange_rate:
-    name: Deploy Exchange Rate Service
-    needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-exchange_rate == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    # AWS
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
-
-    # SERVICE
-    - name: Build, tag, and push image to Amazon ECR [exchange_rate]
-      id: build-exchange_rate-image
-      env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: exchange_rate
-          IMAGE_TAG: ${{ github.sha }}
-      run: |
-        # Build a docker container and push it to ECR so that it can be deployed to ECS.
-        cd server/ascenda/exchange_rate
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
-
-    - name: Create cluster if do not exist [exchange_rate]
-      continue-on-error: true
-      run: |
-        aws ecs create-cluster --region us-east-1 --cluster-name exchange_rate-cluster
-
-    - name: Create services if do not exist [exchange_rate]
-      continue-on-error: true
-      run: |
-        aws ecs create-service --region us-east-1 --cluster exchange_rate-cluster --service-name exchange_rate-service --task-definition exchange_rate --desired-count 2 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[subnet-011126a15d4118ab2],securityGroups=[sg-04ceaf462b4dbd50c]}"
-
-    - name: Download task definition [exchange_rate]
-      run: |
-        aws ecs describe-task-definition --task-definition exchange_rate --query taskDefinition > exchange_rate-taskdef.json
-
-    - name: Fill in the new image ID in the Amazon ECS task definition [exchange_rate]
-      id: exchange_rate-task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: exchange_rate-taskdef.json
-        container-name: exchange_rate_container
-        image: ${{ steps.build-exchange_rate-image.outputs.image }}
-
-    - name: Deploy Amazon ECS task definition [exchange_rate]
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.exchange_rate-task-def.outputs.task-definition }}
-        service: exchange_rate-service
-        cluster: exchange_rate-cluster
-        wait-for-service-stability: true
+  #   - name: Deploy Amazon ECS task definition [exchange_rate]
+  #     uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+  #     with:
+  #       task-definition: ${{ steps.exchange_rate-task-def.outputs.task-definition }}
+  #       service: exchange_rate-service
+  #       cluster: exchange_rate-cluster
+  #       wait-for-service-stability: true
 
 
   deploy-file_handling:
@@ -480,7 +409,7 @@ jobs:
   test:
     name: Test
     # if: always()
-    needs: [deploy-bank, deploy-exchange_rate, deploy-file_handling, deploy-loyalty, deploy-polling, deploy-transaction]
+    needs: [deploy-exchange_rate, deploy-file_handling, deploy-loyalty, deploy-polling, deploy-transaction]
     runs-on: ubuntu-latest
     steps:
 
