@@ -104,6 +104,5 @@ def update_transaction(reference_num, status_code):
         return jsonify({"message": str(e)}), 404
     return "Successfully updated", 201
 
-    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5009, debug=True)
