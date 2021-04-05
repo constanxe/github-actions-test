@@ -104,7 +104,7 @@ jobs:
       env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: bank
-          IMAGE_TAG: ${{ env.GITHUB_SHA }}
+          IMAGE_TAG: ${{ github.sha }}
       run: |
         # Build a docker container and push it to ECR so that it can be deployed to ECS.
         cd server/ascenda/bank
@@ -163,7 +163,7 @@ jobs:
       env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: exchange_rate
-          IMAGE_TAG: ${{ env.GITHUB_SHA }}
+          IMAGE_TAG: ${{ github.sha }}
       run: |
         # Build a docker container and push it to ECR so that it can be deployed to ECS.
         cd server/ascenda/exchange_rate
@@ -232,7 +232,7 @@ jobs:
       env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: file_handling
-          IMAGE_TAG: ${{ env.GITHUB_SHA }}
+          IMAGE_TAG: ${{ github.sha }}
       run: |
         # Build a docker container and push it to ECR so that it can be deployed to ECS.
         cd server/ascenda/file_handling
@@ -301,7 +301,7 @@ jobs:
       env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: loyalty
-          IMAGE_TAG: ${{ env.GITHUB_SHA }}
+          IMAGE_TAG: ${{ github.sha }}
       run: |
         # Build a docker container and push it to ECR so that it can be deployed to ECS.
         cd server/ascenda/loyalty
@@ -360,7 +360,7 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: polling
-        IMAGE_TAG: ${{ env.GITHUB_SHA }}
+        IMAGE_TAG: ${{ github.sha }}
       run: |
         # Build a docker container and push it to ECR so that it can be deployed to ECS.
         cd server/ascenda/polling
@@ -419,7 +419,7 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: transaction
-        IMAGE_TAG: ${{ env.GITHUB_SHA }}
+        IMAGE_TAG: ${{ github.sha }}
       run: |
         # Build a docker container and push it to ECR so that it can be deployed to ECS.
         cd server/ascenda/transaction
