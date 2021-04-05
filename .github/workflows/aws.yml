@@ -258,7 +258,7 @@ jobs:
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.file_handling-task-def.outputs.task-definition }}
-        service: file_handling
+        service: file_handling-service
         cluster: file_handling-cluster
         wait-for-service-stability: true
 
