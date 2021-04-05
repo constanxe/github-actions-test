@@ -138,7 +138,7 @@ class AscendaTransaction(db.Model):
 
     def json(self):
         return {"reference_num": self.reference_num, "file_name": self.file_name}
-
+ 
 @app.route("/ascenda/filehandle/health_check")
 def health_check():
     return jsonify({"message": "Success"}), 200
