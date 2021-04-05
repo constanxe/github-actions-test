@@ -54,144 +54,149 @@
 			]
 		},
 		{
-			"name": "Exchange Rate",
-			"item": [
-				{
-					"name": "Get Exchange Rate Data",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Response time is less than 1000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(1000);",
-									"});",
-									"",
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Response objects are valid\",function() {",
-									"    var Ajv = require('ajv');",
-									"    var ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}",
-									"    //Json schema to be validated",
-									"    var keys = [\"bank_id\", \"loyalty_id\", \"base_exchange_amount\", \"loyalty_exchange_amount\"]",
-									"    var schema = {",
-									"        \"type\": \"object\", ",
-									"        \"properties\" : {",
-									"            exchange_rate: { ",
-									"                \"type\": \"array\", ",
-									"                \"minItems\": 0,",
-									"                \"items\": { \"type\" : \"object\", \"required\": keys  } ",
-									"            }",
-									"        }",
-									"    };",
-									"",
-									"    var jsonData = pm.response.json();",
-									"    var jsonValid = ajv.validate(schema, jsonData);",
-									"    if(!jsonValid){",
-									"        console.log(\"JSON Schema Validation Error: \" + JSON.stringify(ajv.errors));",
-									"    }",
-									"    pm.expect(jsonValid).to.be.true;",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{exchange_url}}/ascenda/exchange_rate",
-							"host": [
-								"{{exchange_url}}"
-							],
-							"path": [
-								"ascenda",
-								"exchange_rate"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
 			"name": "Loyalty",
 			"item": [
 				{
-					"name": "Get Loyalty Data",
-					"event": [
+					"name": "Exchange Rate",
+					"item": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Response time is less than 1000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(1000);",
-									"});",
-									"",
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Response objects are valid\",function() {",
-									"    var Ajv = require('ajv');",
-									"    var ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}",
-									"    //Json schema to be validated",
-									"    var keys = [\"loyalty_id\", \"loyalty_name\", \"loyalty_unit\", \"processing_time\", \"description\", \"enrollment_link\", \"terms_link\", \"validation\"]",
-									"    var schema = {",
-									"        \"type\": \"object\", ",
-									"        \"properties\" : {",
-									"            loyalty_programme: { ",
-									"                \"type\": \"array\", ",
-									"                \"minItems\": 0,",
-									"                \"items\": { \"type\" : \"object\", \"required\": keys  } ",
-									"            }",
-									"        }",
-									"    };",
-									"",
-									"    var jsonData = pm.response.json();",
-									"    var jsonValid = ajv.validate(schema, jsonData);",
-									"    if(!jsonValid){",
-									"        console.log(\"JSON Schema Validation Error: \" + JSON.stringify(ajv.errors));",
-									"    }",
-									"    pm.expect(jsonValid).to.be.true;",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{loyalty_url}}/ascenda/loyalty",
-							"host": [
-								"{{loyalty_url}}"
+							"name": "Get Exchange Rate Data",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response time is less than 1000ms\", function () {",
+											"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+											"});",
+											"",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Response objects are valid\",function() {",
+											"    var Ajv = require('ajv');",
+											"    var ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}",
+											"    //Json schema to be validated",
+											"    var keys = [\"bank_id\", \"loyalty_id\", \"base_exchange_amount\", \"loyalty_exchange_amount\"]",
+											"    var schema = {",
+											"        \"type\": \"object\", ",
+											"        \"properties\" : {",
+											"            exchange_rate: { ",
+											"                \"type\": \"array\", ",
+											"                \"minItems\": 0,",
+											"                \"items\": { \"type\" : \"object\", \"required\": keys  } ",
+											"            }",
+											"        }",
+											"    };",
+											"",
+											"    var jsonData = pm.response.json();",
+											"    var jsonValid = ajv.validate(schema, jsonData);",
+											"    if(!jsonValid){",
+											"        console.log(\"JSON Schema Validation Error: \" + JSON.stringify(ajv.errors));",
+											"    }",
+											"    pm.expect(jsonValid).to.be.true;",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
 							],
-							"path": [
-								"ascenda",
-								"loyalty"
-							]
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{exchange_url}}/ascenda/exchange_rate",
+									"host": [
+										"{{exchange_url}}"
+									],
+									"path": [
+										"ascenda",
+										"exchange_rate"
+									]
+								}
+							},
+							"response": []
 						}
-					},
-					"response": []
+					]
+				},
+				{
+					"name": "Loyalty",
+					"item": [
+						{
+							"name": "Get Loyalty Data",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response time is less than 1000ms\", function () {",
+											"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+											"});",
+											"",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Response objects are valid\",function() {",
+											"    var Ajv = require('ajv');",
+											"    var ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}",
+											"    //Json schema to be validated",
+											"    var keys = [\"loyalty_id\", \"loyalty_name\", \"loyalty_unit\", \"processing_time\", \"description\", \"enrollment_link\", \"terms_link\", \"validation\"]",
+											"    var schema = {",
+											"        \"type\": \"object\", ",
+											"        \"properties\" : {",
+											"            loyalty_programme: { ",
+											"                \"type\": \"array\", ",
+											"                \"minItems\": 0,",
+											"                \"items\": { \"type\" : \"object\", \"required\": keys  } ",
+											"            }",
+											"        }",
+											"    };",
+											"",
+											"    var jsonData = pm.response.json();",
+											"    var jsonValid = ajv.validate(schema, jsonData);",
+											"    if(!jsonValid){",
+											"        console.log(\"JSON Schema Validation Error: \" + JSON.stringify(ajv.errors));",
+											"    }",
+											"    pm.expect(jsonValid).to.be.true;",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{loyalty_url}}/ascenda/loyalty",
+									"host": [
+										"{{loyalty_url}}"
+									],
+									"path": [
+										"ascenda",
+										"loyalty"
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		},
