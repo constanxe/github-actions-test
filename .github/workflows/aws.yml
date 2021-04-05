@@ -62,8 +62,8 @@ jobs:
         filters: |
           ascenda-bank:
             - 'server/ascenda/bank/**'
-          # ascenda-exchange:
-          #  - 'server/ascenda/exchange_rate/**'
+          ascenda-exchange_rate:
+           - 'server/ascenda/exchange_rate/**'
           ascenda-file_handling:
             - 'server/ascenda/file_handling/**'
           ascenda-loyalty:
@@ -133,6 +133,65 @@ jobs:
         wait-for-service-stability: true
 
 
+  deploy-exchange_rate:
+    name: Deploy Exchange Rate Service
+    needs: pre_job
+    # if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-exchange_rate == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # AWS
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    # SERVICE
+    - name: Build, tag, and push image to Amazon ECR [exchange_rate]
+      id: build-exchange_rate-image
+      env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: exchange_rate
+          IMAGE_TAG: ${{ github.sha }}
+      run: |
+        # Build a docker container and push it to ECR so that it can be deployed to ECS.
+        cd server/ascenda/exchange_rate
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+
+    - name: Download task definition [exchange_rate]
+      run: |
+        aws ecs describe-task-definition --task-definition exchange_rate --query taskDefinition > exchange_rate-taskdef.json
+
+    - name: Fill in the new image ID in the Amazon ECS task definition [exchange_rate]
+      id: exchange_rate-task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: exchange_rate-taskdef.json
+        container-name: exchange_rate_container
+        image: ${{ steps.build-exchange_rate-image.outputs.image }}
+
+    - name: Deploy Amazon ECS task definition [exchange_rate]
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.exchange_rate-task-def.outputs.task-definition }}
+        service: exchange_rate
+        cluster: exchange_rate-cluster
+        wait-for-service-stability: true
+
+
   deploy-file_handling:
     name: Deploy File Handling Service
     needs: pre_job
@@ -188,7 +247,7 @@ jobs:
       with:
         task-definition: ${{ steps.file_handling-task-def.outputs.task-definition }}
         service: file_handling
-        cluster: file-handling-cluster
+        cluster: file_handling-cluster
         wait-for-service-stability: true
 
 
@@ -372,7 +431,7 @@ jobs:
   test:
     name: Test
     if: always()
-    needs: [deploy-bank, deploy-file_handling, deploy-loyalty, deploy-polling, deploy-transaction]
+    needs: [deploy-bank, deploy-exchange_rate, deploy-file_handling, deploy-loyalty, deploy-polling, deploy-transaction]
     runs-on: ubuntu-latest
     steps:
 
