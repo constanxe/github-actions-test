@@ -158,7 +158,6 @@ def delete_loyalty(LoyaltyId):
         return jsonify({"message": "An error occurred while processing the accrual"}), 500
     return jsonify({"message": "Success"}), 201
 
-
 @app.route("/ascenda/filehandle/delete_bank/<string:PartnerCode>")
 def delete_bank(PartnerCode):
     response = requests.get('http://ascenda-load-balancer-1751800571.us-east-1.elb.amazonaws.com:5006/ascenda/loyalty')
