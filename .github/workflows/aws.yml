@@ -25,13 +25,9 @@
 
 on:
   push:
-    paths-ignore: 
-      - '**/README.md'
-      - '**/cloudformation/**'
-      - '**/sql/**'
-      - '**/server/bank/**'
-      - '**/server/accrual_file/**'
-      - '**/server/handback_file/**'
+    paths:
+    - '**/server/ascenda/**'
+    - '**/tests/**'
     branches: [ main ]
   pull_request:
     branches: [ main ]
@@ -125,7 +121,7 @@ jobs:
     - name: Create service if non-existent [file_handling]
       continue-on-error: true
       run: |
-        aws ecs create-service --region us-east-1 --cluster file_handling-cluster --service-name file_handling-service --task-definition file_handling --desired-count 2 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[subnet-011126a15d4118ab2],securityGroups=[sg-04ceaf462b4dbd50c]}"
+        aws ecs create-service --region us-east-1 --cluster file_handling-cluster --service-name file_handling-service --task-definition file_handling --desired-count 1 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[subnet-011126a15d4118ab2],securityGroups=[sg-04ceaf462b4dbd50c]}"
 
     - name: Download task definition [file_handling]
       run: |
@@ -194,7 +190,7 @@ jobs:
     - name: Create service if non-existent [exchange_rate]
       continue-on-error: true
       run: |
-        aws ecs create-service --region us-east-1 --cluster loyalty-cluster --service-name exchange_rate-service --task-definition exchange_rate --desired-count 2 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[subnet-011126a15d4118ab2],securityGroups=[sg-04ceaf462b4dbd50c]}"
+        aws ecs create-service --region us-east-1 --cluster loyalty-cluster --service-name exchange_rate-service --task-definition exchange_rate --desired-count 1 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[subnet-011126a15d4118ab2],securityGroups=[sg-04ceaf462b4dbd50c]}"
 
     - name: Download task definition [exchange_rate]
       run: |
@@ -263,7 +259,7 @@ jobs:
     - name: Create service if non-existent [loyalty]
       continue-on-error: true
       run: |
-        aws ecs create-service --region us-east-1 --cluster loyalty-cluster --service-name loyalty-service --task-definition loyalty --desired-count 2 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[subnet-011126a15d4118ab2],securityGroups=[sg-04ceaf462b4dbd50c]}"
+        aws ecs create-service --region us-east-1 --cluster loyalty-cluster --service-name loyalty-service --task-definition loyalty --desired-count 1 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[subnet-011126a15d4118ab2],securityGroups=[sg-04ceaf462b4dbd50c]}"
 
     - name: Download task definition [loyalty]
       run: |
@@ -324,6 +320,16 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
+    - name: Create cluster if do not exist [polling]
+      continue-on-error: true
+      run: |
+        aws ecs create-cluster --region us-east-1 --cluster-name polling-cluster
+
+    - name: Create service if non-existent [polling]
+      continue-on-error: true
+      run: |
+        aws ecs create-service --region us-east-1 --cluster polling-cluster --service-name polling-service --task-definition polling --desired-count 1 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[subnet-011126a15d4118ab2],securityGroups=[sg-04ceaf462b4dbd50c]}"
+
     - name: Download task definition [polling]
       run: |
         aws ecs describe-task-definition --task-definition polling-task --query taskDefinition > polling-taskdef.json
@@ -382,6 +388,16 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+
+    - name: Create cluster if do not exist [transaction]
+      continue-on-error: true
+      run: |
+        aws ecs create-cluster --region us-east-1 --cluster-name transaction-cluster
+
+    - name: Create service if non-existent [transaction]
+      continue-on-error: true
+      run: |
+        aws ecs create-service --region us-east-1 --cluster transaction-cluster --service-name transaction-service --task-definition transaction --desired-count 1 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[subnet-011126a15d4118ab2],securityGroups=[sg-04ceaf462b4dbd50c]}"
 
     - name: Download task definition [transaction]
       run: |
