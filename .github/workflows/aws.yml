@@ -188,7 +188,7 @@ jobs:
       with:
         task-definition: ${{ steps.exchange_rate-task-def.outputs.task-definition }}
         service: exchange_rate
-        cluster: exchange_rate-cluster
+        cluster: exchange-rate-cluster
         wait-for-service-stability: true
 
 
@@ -247,7 +247,7 @@ jobs:
       with:
         task-definition: ${{ steps.file_handling-task-def.outputs.task-definition }}
         service: file_handling
-        cluster: file_handling-cluster
+        cluster: file-handling-cluster
         wait-for-service-stability: true
 
 
