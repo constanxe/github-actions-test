@@ -42,6 +42,7 @@ jobs:
       should_deploy-exchange_rate: ${{ steps.changed_files.outputs.ascenda-exchange_rate == 'true' }}
       should_deploy-file_handling: ${{ steps.changed_files.outputs.ascenda-file_handling == 'true' }}
       should_deploy-loyalty: ${{ steps.changed_files.outputs.ascenda-loyalty == 'true' }}
+      should_deploy-polling: ${{ steps.changed_files.outputs.ascenda-polling == 'true' }}
       should_deploy-transaction: ${{ steps.changed_files.outputs.ascenda-transaction == 'true' }}
     steps:
 
@@ -78,7 +79,7 @@ jobs:
   deploy-bank:
     name: Deploy Bank Service
     needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-bank == 'true' }}
+    # if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-bank == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
@@ -137,7 +138,7 @@ jobs:
   deploy-exchange_rate:
     name: Deploy Exchange Rate Service
     needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-exchange_rate == 'true' }}
+    # if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-exchange_rate == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
@@ -206,7 +207,7 @@ jobs:
   deploy-file_handling:
     name: Deploy File Handling Service
     needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-file_handling == 'true' }}
+    # if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-file_handling == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
@@ -275,7 +276,7 @@ jobs:
   deploy-loyalty:
     name: Deploy Loyalty Service
     needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-loyalty == 'true' }}
+    # if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-loyalty == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
@@ -334,7 +335,7 @@ jobs:
   deploy-polling:
     name: Deploy Polling Service
     needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-polling == 'true' }}
+    # if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-polling == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
@@ -393,7 +394,7 @@ jobs:
   deploy-transaction:
     name: Deploy Transaction Service
     needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-transaction == 'true' }}
+    # if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-transaction == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
