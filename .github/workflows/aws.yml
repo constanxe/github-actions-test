@@ -63,8 +63,6 @@ jobs:
       uses: dorny/paths-filter@v2
       with:
         filters: |
-          # server:
-          #   - 'server/**'
           ascenda-file_handling:
             - 'server/ascenda/file_handling/**'
           ascenda-exchange_rate:
@@ -75,11 +73,6 @@ jobs:
             - 'server/ascenda/polling/**'
           ascenda-transaction:
             - 'server/ascenda/transaction/**'
-    
-    - name: flake8 Lint
-      uses: py-actions/flake8@v1
-      # if: ${{ steps.changed_files.outputs.server == 'true' }}
-
 
   deploy-file_handling:
     name: Deploy FileHandling Service in FileHandling Cluster
