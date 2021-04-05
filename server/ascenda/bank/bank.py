@@ -13,7 +13,7 @@ CORS(app)
 
 class AscendaBank(db.Model):
     __tablename__ = 'ascenda_bank'
- 
+
     bank_id = db.Column(db.VARCHAR(100), primary_key=True)
     bank_name = db.Column(db.String(80), nullable=False)
     bank_unit = db.Column(db.String(80), nullable=False)
