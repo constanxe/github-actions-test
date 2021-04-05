@@ -77,6 +77,54 @@
 			]
 		},
 		{
+			"name": "File Handling",
+			"item": [
+				{
+					"name": "File Handling Health Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+									"});",
+									"",
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{file_handling_url}}/ascenda/filehandle/health_check",
+							"host": [
+								"{{file_handling_url}}"
+							],
+							"path": [
+								"ascenda",
+								"filehandle",
+								"health_check"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Exchange Rate",
 			"item": [
 				{
@@ -219,6 +267,53 @@
 			]
 		},
 		{
+			"name": "Polling",
+			"item": [
+				{
+					"name": "Polling Health Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+									"});",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{polling_url}}/polling/health_check",
+							"host": [
+								"{{polling_url}}"
+							],
+							"path": [
+								"polling",
+								"health_check"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Transaction",
 			"item": [
 				{
@@ -328,12 +423,12 @@
 			"value": "http://ascenda-lb-1398984097.us-east-1.elb.amazonaws.com:5006"
 		},
 		{
-			"key": "transaction_url",
-			"value": "http://ascenda-lb-1398984097.us-east-1.elb.amazonaws.com:5004"
+			"key": "polling_url",
+			"value": "http://ascenda-load-balancer-1751800571.us-east-1.elb.amazonaws.com:5009"
 		},
 		{
-			"key": "polling_url\n",
-			"value": "http://ascenda-load-balancer-1751800571.us-east-1.elb.amazonaws.com:5009"
+			"key": "transaction_url",
+			"value": "http://ascenda-lb-1398984097.us-east-1.elb.amazonaws.com:5004"
 		}
 	]
 }
