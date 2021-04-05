@@ -32,7 +32,7 @@ on:
   pull_request:
     branches: [ main ]
 
-name: Deploy to Amazon ECS
+name: Deploy to Amazon ECS and/or Testing
 
 jobs:
 
@@ -77,7 +77,7 @@ jobs:
   deploy-file_handling:
     name: Deploy FileHandling Service in FileHandling Cluster
     needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-file_handling == 'true' }}
+    # if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-file_handling == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
@@ -146,7 +146,7 @@ jobs:
   deploy-exchange_rate:
     name: Deploy ExchangeRate Service in Loyalty Cluser
     needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-exchange_rate == 'true' }}
+    # if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-exchange_rate == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
@@ -215,7 +215,7 @@ jobs:
   deploy-loyalty:
     name: Deploy Loyalty Service in Loyalty Cluster
     needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-loyalty == 'true' }}
+    # if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-loyalty == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
@@ -284,7 +284,7 @@ jobs:
   deploy-polling:
     name: Deploy Polling Service in Polling Cluster
     needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-polling == 'true' }}
+    # if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-polling == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
@@ -353,7 +353,7 @@ jobs:
   deploy-transaction:
     name: Deploy Transaction Service in Transaction Cluster
     needs: pre_job
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-transaction == 'true' }}
+    # if: ${{ needs.pre_job.outputs.should_skip != 'true' && needs.pre_job.outputs.should_deploy-transaction == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
