@@ -177,6 +177,7 @@ def delete_bank(PartnerCode):
         return jsonify({"message": "Success"}), 201
     return jsonify({"message": "An error occurred while processing the accrual"}), 500
 
+
 # send accrual to S3 buckets change filename to bank_timestamp
 @app.route("/ascenda/filehandle/send_accrual/", methods=['POST'])
 def send_accrual(*args, **kwargs):
