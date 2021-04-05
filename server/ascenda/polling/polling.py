@@ -20,11 +20,11 @@ session = botocore.session.get_session()
 dax_endpoint = "polling-1-cluster.evzyxg.clustercfg.dax.use1.cache.amazonaws.com:8111"
 dax_client = amazondax.AmazonDaxClient(session, region_name=region, endpoints=[dax_endpoint])
 
-@app.route("/polling/healthcheck", methods=["GET"])
+@app.route("/ascenda/polling/health_check", methods=["GET"])
 def heartbeat():
     return jsonify({"message": "Success"}), 200
     
-@app.route("/polling/<string:reference_num>", methods=['GET'])
+@app.route("/ascenda/polling/<string:reference_num>", methods=['GET'])
 def get_transaction(reference_num):
     #To get transaction status
     try:
@@ -48,7 +48,7 @@ def get_transaction(reference_num):
     # return transaction
     return jsonify(transaction)
     
-@app.route("/polling/accrual", methods=['POST'])
+@app.route("/ascenda/polling/accrual", methods=['POST'])
 def accrual():
     data = request.get_json()
     try:

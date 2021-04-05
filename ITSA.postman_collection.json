@@ -299,11 +299,12 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{polling_url}}/polling/health_check",
+							"raw": "{{polling_url}}/ascenda/polling/health_check",
 							"host": [
 								"{{polling_url}}"
 							],
 							"path": [
+								"ascenda",
 								"polling",
 								"health_check"
 							]
