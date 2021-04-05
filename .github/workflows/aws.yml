@@ -214,8 +214,8 @@ jobs:
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.exchange_rate-task-def.outputs.task-definition }}
-        service: loyalty-service
-        cluster: exchange_rate-cluster
+        service: exchange_rate-service
+        cluster: loyalty-cluster
         wait-for-service-stability: true
 
 
