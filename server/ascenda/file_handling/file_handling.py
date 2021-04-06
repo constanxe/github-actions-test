@@ -86,7 +86,7 @@ def delete_filehandle(PartnerCode, BankUserId):
 
     return jsonify({"message": "Filehandle records deleted successfully"}), 201
 
- 
+
 #-----------------------------------------------------------------------------------------------------------------------
 # connection to s3
 access_key_id='AKIA2OKFRCBLVW5I3KVT'
