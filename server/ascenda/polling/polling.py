@@ -12,7 +12,7 @@ app = Flask(__name__)
 CORS(app)
 
 my_session = boto3.session.Session()
-
+ 
 region = 'us-east-1'
 dynamodb = boto3.resource('dynamodb', region_name=region)
 tablename = 'polling'
