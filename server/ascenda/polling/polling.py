@@ -18,6 +18,7 @@ dynamodb = boto3.resource('dynamodb', region_name=region)
 tablename = 'polling'
 session = botocore.session.get_session()
 dax_endpoint = "polling-1-cluster.evzyxg.clustercfg.dax.use1.cache.amazonaws.com:8111"
+# dax_endpoint = "polling.o3dkof.clustercfg.dax.use1.cache.amazonaws.com:8111"
 dax_client = amazondax.AmazonDaxClient(session, region_name=region, endpoints=[dax_endpoint])
 
 @app.route("/polling/healthcheck", methods=["GET"])
@@ -104,6 +105,6 @@ def update_transaction(reference_num, status_code):
         return jsonify({"message": str(e)}), 404
     return "Successfully updated", 201
 
-
+    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5009, debug=True)

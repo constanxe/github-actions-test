@@ -1,12 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-import re, os
+import re
 
 app = Flask(__name__)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/cs301_team1_ascenda'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://admin:itsaadmin@ascenda-loyalty-read.cq4bzcmfnjpo.us-east-1.rds.amazonaws.com/cs301_team1_ascenda'
-# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["dbURL"]
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/cs301_team1_ascenda'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/cs301_team1_ascenda'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
  
 db = SQLAlchemy(app)
@@ -67,7 +66,7 @@ def create_loyalty(LoyaltyId):
     except:
         return jsonify({"message": "An error occurred creating the loyalty programme."}), 500
 
-    return jsonify(loyalty_info.json()), 200
+    return jsonify(loyalty_info.json()), 201
 
 # update loyalty programme with loyalty ID
 @app.route("/ascenda/loyalty/update/<string:LoyaltyId>/", methods=['POST'])
@@ -95,7 +94,7 @@ def update_loyalty(LoyaltyId):
     except:
         return jsonify({"message": "An error occurred updating the loyalty programme."}),500
 
-    return jsonify(loyalty_info.json()),200
+    return jsonify(loyalty_info.json()),201
 
 # Loyalty Membership Validation
 @app.route("/ascenda/loyalty/membership/<string:LoyaltyId>/<string:MembershipID>")
@@ -106,27 +105,14 @@ def membership_validation(LoyaltyId, MembershipID):
         validation_pattern = loyalty_info.validation
         print(validation_pattern)
         if re.fullmatch(validation_pattern, MembershipID):
-            return jsonify({"result": True}), 200
-        return jsonify({"result": False}), 200
+            return jsonify({"result": True}), 201
+        return jsonify({"result": False}), 400
 
     return jsonify({"message": "Loyalty programme not found."}), 404
 
-# delete loyalty record
-@app.route("/ascenda/loyalty/delete/<string:LoyaltyId>")
-def delete_loyalty(LoyaltyId):
-    loyalty_detail = AscendaLoyalty.query.filter_by(loyalty_id=LoyaltyId).first()
-   
-    try:
-        db.session.delete(loyalty_detail)
-        db.session.commit()
-        
-    except:
-        return jsonify({"message": "An error occurred deleting the record."}),500
-
-    return jsonify(loyalty_detail.json()), 200
 
 if __name__ == '__main__': # if it is the main program you run, then start flask
     # with docker
     # app.run(host='0.0.0.0', port=5000, debug=True)
-    app.run(host='0.0.0.0', port=5006, debug=True) #to allow the file to be named other stuff apart from app.py
+    app.run(port=5006, debug=True) #to allow the file to be named other stuff apart from app.py
     # debug=True; shows the error and it will auto restart

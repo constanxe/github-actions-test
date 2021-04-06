@@ -28,9 +28,9 @@ on:
     paths:
     - '**/server/ascenda/**'
     - '**/tests/**'
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 name: Deploy to Amazon ECS and/or Testing
 
@@ -73,6 +73,7 @@ jobs:
             - 'server/ascenda/polling/**'
           ascenda-transaction:
             - 'server/ascenda/transaction/**'
+
 
   deploy-file_handling:
     name: Deploy FileHandling Service in FileHandling Cluster
@@ -138,7 +139,7 @@ jobs:
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.file_handling-task-def.outputs.task-definition }}
-        service: file_handling-service
+        service: file_handling
         cluster: file-handling-cluster
         wait-for-service-stability: true
 
@@ -421,7 +422,7 @@ jobs:
 
   test:
     name: Test
-    if: always()
+    # if: always()
     needs: [deploy-file_handling, deploy-exchange_rate, deploy-loyalty, deploy-polling, deploy-transaction]
     runs-on: ubuntu-latest
     steps:

@@ -12,7 +12,8 @@ import os
 
 app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/cs301_team1_ascenda'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://admin:itsaadmin@ascenda-transaction.cq4bzcmfnjpo.us-east-1.rds.amazonaws.com/cs301_team1_ascenda'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://admin:itsaadmin@ascenda-transaction.cq4bzcmfnjpo.us-east-1.rds.amazonaws.com/cs301_team1_ascenda'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["dbURL"]
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -110,7 +111,7 @@ def create_transaction():
         return jsonify({"message": "Failed to create transaction"}), 500
         # return jsonify({"message": "An error occurred creating the transaction."}), 500
 
-    return jsonify(transaction_info.json()), 201
+    return jsonify(transaction_info.json()), 200
 
 # update transaction status
 @app.route("/ascenda/transaction/update_status/<string:TransactionId>", methods=['POST'])
@@ -132,7 +133,7 @@ def update_transaction_status(TransactionId):
     except:
         return jsonify({"message": "An error occurred updating the transaction status."}),500
 
-    return jsonify(transaction.json()),201
+    return jsonify(transaction.json()),200
     
 # update transaction with transaction ID
 @app.route("/ascenda/transaction/update/<string:TransactionId>/", methods=['POST'])
@@ -166,31 +167,43 @@ def update_transaction(TransactionId):
     except:
         return jsonify({"message": "An error occurred updating the transaction."}),500
 
-    return jsonify(transaction_info.json()),201
+    return jsonify(transaction_info.json()),200
 
 # delete loyalty transaction record
 @app.route("/ascenda/transaction/deleteloyalty/<string:LoyaltyId>")
 def delete_transaction_loyalty(LoyaltyId):
     try:
+        delete_file = requests.get('http://ascenda-load-balancer-1751800571.us-east-1.elb.amazonaws.com:5008/ascenda/filehandle/delete_loyalty/' + LoyaltyId)
         AscendaTransaction.query.filter_by(loyalty_id=LoyaltyId).delete()
         db.session.commit()
-        
     except:
         return jsonify({"message": "An error occurred deleting the record."}),500
 
-    return jsonify({"message": "Transactions deleted successfully"}), 201
+    return jsonify({"message": "Transactions deleted successfully"}), 200
 
 # delete partner transaction record
 @app.route("/ascenda/transaction/deletebank/<string:PartnerCode>")
 def delete_transaction_partner(PartnerCode):
     try:
+        delete_file = requests.get('http://ascenda-load-balancer-1751800571.us-east-1.elb.amazonaws.com:5008/ascenda/filehandle/delete_bank/' + PartnerCode)
         AscendaTransaction.query.filter_by(partner_code=PartnerCode).delete()
         db.session.commit()
-        
     except:
         return jsonify({"message": "An error occurred deleting the record."}),500
 
-    return jsonify({"message": "Transactions deleted successfully"}), 201
+    return jsonify({"message": "Transactions deleted successfully"}), 200
+
+# delete partner transaction record
+@app.route("/ascenda/transaction/deleterecord/<string:PartnerCode>/<string:BankUserId>")
+def delete_transaction(PartnerCode, BankUserId):
+    try:
+        AscendaTransaction.query.filter_by(partner_code=PartnerCode, bank_user_id=BankUserId).delete()
+        delete_file = requests.get('http://ascenda-load-balancer-1751800571.us-east-1.elb.amazonaws.com:5008/ascenda/filehandle/delete_user/' + PartnerCode + "/" + BankUserId)
+        db.session.commit()
+    except:
+        return jsonify({"message": "An error occurred deleting the record."}),500
+
+    return jsonify({"message": "Transaction deleted successfully"}), 201
 
 if __name__ == '__main__': # if it is the main program you run, then start flask
     # with docker

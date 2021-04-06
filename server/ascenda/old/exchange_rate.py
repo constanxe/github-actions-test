@@ -2,11 +2,10 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from os import environ
-import os
 
 app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/cs301_team1_ascenda'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://admin:itsaadmin@ascenda-exchange-rate-read-db.cq4bzcmfnjpo.us-east-1.rds.amazonaws.com/cs301_team1_ascenda'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/cs301_team1_ascenda'
 # app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
  
@@ -69,7 +68,7 @@ def create_exchange_rate(BankId, PartnerId):
     except:
         return jsonify({"message": "An error occurred creating the exchange rate."}), 500
 
-    return jsonify(rate_detail.json()), 200
+    return jsonify(rate_detail.json()), 201
 
 @app.route("/ascenda/exchange_rate/update/<string:BankId>/<string:PartnerId>/", methods=['POST'])
 def update_rate(BankId, PartnerId):
@@ -88,11 +87,11 @@ def update_rate(BankId, PartnerId):
     except:
         return jsonify({"message": "An error occurred updating the exchange rate."}),500
 
-    return jsonify(rate_detail.json()),200
+    return jsonify(rate_detail.json()),201
 
 
 if __name__ == '__main__': # if it is the main program you run, then start flask
     # with docker
     # app.run(host='0.0.0.0', port=5000, debug=True)
-    app.run(host='0.0.0.0', port=5003, debug=True) #to allow the file to be named other stuff apart from app.py
+    app.run(port=5003, debug=True) #to allow the file to be named other stuff apart from app.py
     # debug=True; shows the error and it will auto restart

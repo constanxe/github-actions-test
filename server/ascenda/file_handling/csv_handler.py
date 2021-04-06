@@ -21,7 +21,7 @@ def csv_process_default(reader):
     for row in reader:
         transactions.append(row)
     
-    return transactions
+    return header, transactions
 
 # 0, 2, 1, 3 --> 0, 1, 2, 3
 def csv_process_conrad(reader):
@@ -31,7 +31,7 @@ def csv_process_conrad(reader):
         row[1], row[2] = row[2], row[1]
         transactions.append(row)
     
-    return transactions
+    return header, transactions
 
 # 3, 2, 1, 0 --> 0, 1, 2, 3
 def csv_process_eminent(reader):
@@ -41,7 +41,7 @@ def csv_process_eminent(reader):
         row[3], row[2], row[1], row[0] = row[0], row[1], row[2], row[3]
         transactions.append(row)
     
-    return transactions
+    return header, transactions
 
 # 3, 1, 2, 0 --> 0, 1, 2, 3
 def csv_process_quantum(reader):
@@ -51,4 +51,4 @@ def csv_process_quantum(reader):
         row[3], row[0] = row[0], row[3]
         transactions.append(row)
     
-    return transactions
+    return header, transactions
