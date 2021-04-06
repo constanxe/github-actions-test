@@ -115,12 +115,12 @@ jobs:
     - name: Create cluster if do not exist [file_handling]
       continue-on-error: true
       run: |
-        aws ecs create-cluster --region us-east-1 --cluster-name file_handling-cluster
+        aws ecs create-cluster --region us-east-1 --cluster-name file-handling-cluster
 
     - name: Create service if non-existent [file_handling]
       continue-on-error: true
       run: |
-        aws ecs create-service --region us-east-1 --cluster file_handling-cluster --service-name file_handling-service --task-definition file_handling --desired-count 1 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[subnet-011126a15d4118ab2],securityGroups=[sg-04ceaf462b4dbd50c]}"
+        aws ecs create-service --region us-east-1 --cluster file-handling-cluster --service-name file_handling-service --task-definition file_handling --desired-count 1 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[subnet-011126a15d4118ab2],securityGroups=[sg-04ceaf462b4dbd50c]}"
 
     - name: Download task definition [file_handling]
       run: |
@@ -139,7 +139,7 @@ jobs:
       with:
         task-definition: ${{ steps.file_handling-task-def.outputs.task-definition }}
         service: file_handling-service
-        cluster: file_handling-cluster
+        cluster: file-handling-cluster
         wait-for-service-stability: true
 
 
@@ -189,7 +189,7 @@ jobs:
     - name: Create service if non-existent [exchange_rate]
       continue-on-error: true
       run: |
-        aws ecs create-service --region us-east-1 --cluster loyalty-cluster --service-name exchange_rate-service --task-definition exchange_rate --desired-count 1 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[subnet-011126a15d4118ab2],securityGroups=[sg-04ceaf462b4dbd50c]}"
+        aws ecs create-service --region us-east-1 --cluster loyalty-cluster --service-name exchange-rate-service --task-definition exchange_rate --desired-count 1 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[subnet-011126a15d4118ab2],securityGroups=[sg-04ceaf462b4dbd50c]}"
 
     - name: Download task definition [exchange_rate]
       run: |
@@ -207,7 +207,7 @@ jobs:
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.exchange_rate-task-def.outputs.task-definition }}
-        service: exchange_rate-service
+        service: exchange-rate-service
         cluster: loyalty-cluster
         wait-for-service-stability: true
 
