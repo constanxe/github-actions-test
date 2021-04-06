@@ -121,7 +121,7 @@ jobs:
     - name: Create service if non-existent [file_handling]
       continue-on-error: true
       run: |
-        aws ecs create-service --region us-east-1 --cluster file-handling-cluster --service-name file_handling-service --task-definition file_handling --desired-count 1 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[subnet-011126a15d4118ab2],securityGroups=[sg-04ceaf462b4dbd50c]}"
+        aws ecs create-service --region us-east-1 --cluster file-handling-cluster --service-name file_handling --task-definition file_handling --desired-count 1 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[subnet-011126a15d4118ab2],securityGroups=[sg-04ceaf462b4dbd50c]}"
 
     - name: Download task definition [file_handling]
       run: |
