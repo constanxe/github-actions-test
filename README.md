@@ -6,7 +6,7 @@ You may refer to the following for the Continuous Integration and Continuous Dev
 - Workflow: [.github/workflows/aws.yml](https://github.com/constanxe/github-actions-test/blob/main/.github/workflows/aws.yml)
 - Example of a workflow run: [CI/CD which showcased streamlining via 'Concurrent running of jobs' and 'Path changes filter'](https://github.com/constanxe/github-actions-test/actions/runs/719363493)
 
-Take note that every other code is outdated since this was solely a temporary space for testing the workflow.
+Take note that this was solely a temporary space for testing the workflow, hence every other code is outdated and was contributed by my group too.
 
 
 ### Explanation
